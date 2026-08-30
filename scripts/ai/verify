@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+risk="auto"
+base=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --risk)
+      risk="${2:-}"
+      shift 2
+      ;;
+    --base)
+      base="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+./scripts/ai/self-test
+
+git diff --check
+
+if [[ -f ai/TEMPLATE_MODE ]]; then
+  echo "PASS template-mode harness verification (product gates are intentionally inactive)"
+  echo "Run bootstrap-project, configure ai/commands.conf, then remove ai/TEMPLATE_MODE in a real project."
+  exit 0
+fi
+
+# shellcheck disable=SC1091
+source ai/commands.conf
+
+if [[ "${PROJECT_READY:-false}" != "true" ]]; then
+  echo "FAIL ai/commands.conf has PROJECT_READY != true" >&2
+  echo "Run bootstrap-project and configure deterministic project checks first." >&2
+  exit 2
+fi
+
+if [[ "$risk" == "auto" ]]; then
+  if [[ -n "$base" ]]; then
+    risk="$(./scripts/ai/classify-risk --base "$base" --format level)"
+  else
+    risk="$(./scripts/ai/classify-risk --format level)"
+  fi
+fi
+
+case "$risk" in
+  green) gates=(lint unit) ;;
+  yellow) gates=(typecheck lint unit integration build security architecture) ;;
+  red) gates=(typecheck lint unit integration e2e build security dependency architecture visual) ;;
+  *) echo "FAIL invalid risk level: $risk" >&2; exit 2 ;;
+esac
+
+stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+outdir=".ai-artifacts/verification/$stamp"
+mkdir -p "$outdir"
+summary="$outdir/summary.md"
+{
+  echo "# Verification Summary"
+  echo
+  echo "- Risk: $risk"
+  echo "- Revision: $(git rev-parse --short HEAD 2>/dev/null || echo working-tree)"
+  echo "- UTC: $stamp"
+  echo
+  echo "| Gate | Result | Detail |"
+  echo "|---|---|---|"
+} > "$summary"
+
+fail=0
+for gate in "${gates[@]}"; do
+  upper="$(printf '%s' "$gate" | tr '[:lower:]' '[:upper:]')"
+  cmd_var="${upper}_CMD"
+  reason_var="${upper}_NA_REASON"
+  cmd="${!cmd_var:-}"
+  na_reason="${!reason_var:-}"
+  log="$outdir/$gate.log"
+
+  if [[ -n "$cmd" ]]; then
+    echo "RUN $gate: $cmd"
+    set +e
+    bash -lc "$cmd" >"$log" 2>&1
+    status=$?
+    set -e
+    if [[ $status -eq 0 ]]; then
+      echo "PASS $gate"
+      printf '| %s | PASS | `%s` |\n' "$gate" "$cmd" >> "$summary"
+    else
+      echo "FAIL $gate (exit $status); see $log" >&2
+      printf '| %s | FAIL | exit %s; `%s` |\n' "$gate" "$status" "$cmd" >> "$summary"
+      fail=1
+    fi
+  elif [[ -n "$na_reason" ]]; then
+    echo "N/A $gate: $na_reason"
+    printf '| %s | N/A | %s |\n' "$gate" "$na_reason" >> "$summary"
+  else
+    echo "FAIL $gate is required for $risk but has neither a command nor an N/A reason" >&2
+    printf '| %s | UNCONFIGURED | required for %s |\n' "$gate" "$risk" >> "$summary"
+    fail=1
+  fi
+done
+
+echo
+echo "Verification summary: $summary"
+cat "$summary"
+
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
+fi

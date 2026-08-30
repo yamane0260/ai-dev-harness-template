@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+base=""
+format="text"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --base)
+      base="${2:-}"
+      shift 2
+      ;;
+    --format)
+      format="${2:-text}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [[ -z "$base" ]]; then
+  if git rev-parse --verify origin/main >/dev/null 2>&1; then
+    base="origin/main"
+  elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+    base="HEAD~1"
+  else
+    base=""
+  fi
+fi
+
+if [[ -n "$base" ]]; then
+  files="$(git diff --name-only "$base"...HEAD 2>/dev/null || git diff --name-only "$base" HEAD 2>/dev/null || true)"
+  diff="$(git diff --unified=0 "$base"...HEAD 2>/dev/null || git diff --unified=0 "$base" HEAD 2>/dev/null || true)"
+else
+  files="$(git status --porcelain | sed -E 's/^.. //')"
+  diff="$(git diff --unified=0 -- .; git diff --cached --unified=0 -- .)"
+fi
+
+haystack="${files}"$'\n'"${diff}"
+level="green"
+reasons=()
+
+red_pattern='(^|/)(auth|authentication|authorization|permissions?|roles?|migrations?|security|payments?|billing|infra|terraform|k8s|kubernetes|production|prod)(/|\.|$)|\.github/workflows/|ai/policies/(risk-policy|quality-gates)\.md|scripts/ai/(verify|classify-risk)|secrets?|personal[_ -]?data|tenant[_ -]?isolation'
+yellow_pattern='(^|/)(api|routes?|controllers?|components?|pages?|ui|frontend|backend|data|integrations?)(/|\.|$)|package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|pyproject\.toml|poetry\.lock|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|docs/DESIGN\.md|schema|contract|dependency'
+destructive_pattern='(^|[^A-Z])(DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE|DELETE[[:space:]]+FROM|destroy|purge|hard[ -]?delete)'
+
+if printf '%s\n' "$haystack" | grep -Eiq "$red_pattern"; then
+  level="red"
+  reasons+=("security/data/production/harness-sensitive paths or terms changed")
+fi
+if printf '%s\n' "$diff" | grep -Eiq "$destructive_pattern"; then
+  level="red"
+  reasons+=("potentially destructive operation detected")
+fi
+if [[ "$level" == "green" ]] && printf '%s\n' "$haystack" | grep -Eiq "$yellow_pattern"; then
+  level="yellow"
+  reasons+=("user-facing/API/data/dependency surface changed")
+fi
+
+if [[ ${#reasons[@]} -eq 0 ]]; then
+  reasons+=("no deterministic YELLOW/RED pattern detected")
+fi
+
+case "$format" in
+  level)
+    printf '%s\n' "$level"
+    ;;
+  text)
+    printf 'risk=%s\n' "$level"
+    for r in "${reasons[@]}"; do
+      printf 'reason=%s\n' "$r"
+    done
+    ;;
+  *)
+    echo "Unsupported format: $format" >&2
+    exit 2
+    ;;
+esac

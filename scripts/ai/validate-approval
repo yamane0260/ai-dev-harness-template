@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+file="${1:-}"
+if [[ -z "$file" || ! -f "$file" ]]; then
+  echo "Usage: $0 <approval-packet.md>" >&2
+  exit 2
+fi
+
+required_headings=(
+  "## Decision requested"
+  "## Why human judgment is required"
+  "## Minimum background knowledge"
+  "## Consequence in plain language"
+  "## Verification evidence"
+  "## Risk assessment"
+  "## Assumptions"
+  "## Blocking unknowns"
+  "## Worst case"
+  "## Rollback / recovery"
+  "## Alternatives"
+  "## Recommendation"
+  "## Strongest argument against the recommendation"
+  "## Human check"
+)
+
+fail=0
+for heading in "${required_headings[@]}"; do
+  if ! grep -Fqx "$heading" "$file"; then
+    echo "FAIL missing heading: $heading" >&2
+    fail=1
+  fi
+done
+
+if grep -Eq '<[^>]+>' "$file"; then
+  echo "FAIL unresolved template placeholders remain" >&2
+  fail=1
+fi
+
+blocking_section="$(awk '/^## Blocking unknowns$/{flag=1;next}/^## /{if(flag)exit}flag' "$file")"
+if ! printf '%s\n' "$blocking_section" | grep -Eiq '(^|[[:space:]-])none([[:space:].]|$)|(^|[[:space:]-])なし([[:space:]。]|$)'; then
+  echo "BLOCKED approval packet contains unresolved blocking unknowns" >&2
+  fail=1
+fi
+
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
+fi
+
+echo "PASS approval packet structure and blocking-unknown check"

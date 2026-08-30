@@ -1,0 +1,3 @@
+This marker exists only in the reusable template.
+Run the bootstrap-project skill when adopting the harness into a real project.
+The skill must configure ai/commands.conf and remove this file before the project is considered protected.

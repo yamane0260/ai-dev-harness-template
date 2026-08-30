@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+required=(
+  "AGENTS.md"
+  "docs/PRODUCT.md"
+  "docs/ARCHITECTURE.md"
+  "docs/SECURITY.md"
+  "docs/DESIGN.md"
+  "docs/RELIABILITY.md"
+  "ai/policies/risk-policy.md"
+  "ai/policies/quality-gates.md"
+  "ai/commands.conf"
+  "ai/templates/approval-packet.md"
+  "scripts/ai/classify-risk"
+  "scripts/ai/verify"
+  "scripts/ai/validate-approval"
+)
+
+fail=0
+for path in "${required[@]}"; do
+  if [[ ! -f "$path" ]]; then
+    echo "FAIL missing required file: $path"
+    fail=1
+  fi
+done
+
+skills=(
+  bootstrap-project develop-feature verify-work debug-systematically
+  review-code review-security review-design prepare-approval release-change
+)
+for skill in "${skills[@]}"; do
+  file=".agents/skills/$skill/SKILL.md"
+  if [[ ! -f "$file" ]]; then
+    echo "FAIL missing skill: $file"
+    fail=1
+    continue
+  fi
+  if ! grep -q "^name: $skill$" "$file"; then
+    echo "FAIL skill name mismatch: $file"
+    fail=1
+  fi
+  if grep -q '\[TODO' "$file"; then
+    echo "FAIL unresolved TODO in: $file"
+    fail=1
+  fi
+done
+
+for script in scripts/ai/self-test scripts/ai/classify-risk scripts/ai/verify scripts/ai/validate-approval; do
+  if ! bash -n "$script"; then
+    echo "FAIL shell syntax: $script"
+    fail=1
+  fi
+done
+
+# A real product must not accidentally keep the template bypass marker.
+if [[ -f ai/TEMPLATE_MODE ]]; then
+  markers=(package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle build.gradle.kts)
+  for marker in "${markers[@]}"; do
+    if [[ -e "$marker" ]]; then
+      echo "FAIL product marker '$marker' exists while ai/TEMPLATE_MODE is still present"
+      fail=1
+    fi
+  done
+  for dir in src app apps backend frontend services; do
+    if [[ -d "$dir" ]]; then
+      echo "FAIL product directory '$dir/' exists while ai/TEMPLATE_MODE is still present"
+      fail=1
+    fi
+  done
+fi
+
+if [[ "$fail" -ne 0 ]]; then
+  exit 1
+fi
+
+echo "PASS harness self-test"
