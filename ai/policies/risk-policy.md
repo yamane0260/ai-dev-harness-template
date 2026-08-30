@@ -1,94 +1,39 @@
 # Risk Policy
 
-Risk controls how much evidence and human judgment a change requires. The goal is not to maximize approvals; it is to prevent high-consequence mistakes while allowing low-risk work to move autonomously.
+Risk controls evidence/release requirements. It does **not** control how much context an agent should load. Context/orchestration is separately classified as MICRO / STANDARD / CRITICAL in `AGENTS.md` and `develop-feature`.
+
+A tiny auth change can therefore be CRITICAL/RED, while a broad but low-consequence refactor may be STANDARD/GREEN or YELLOW.
 
 ## General rules
 
 1. `./scripts/ai/classify-risk` provides a deterministic **risk floor** from the diff.
-2. An agent may raise the risk level based on context, uncertainty, or consequences.
+2. An agent may raise risk based on consequences or uncertainty.
 3. An agent must not lower the deterministic floor without an explicit human decision recorded in the PR.
 4. Unknowns increase risk. A blocking unknown prevents release.
-5. Risk is about consequences, not code size.
+5. Risk is about consequences, not code size or context size.
 
 ## GREEN
 
-Typical examples:
+Typical examples: documentation/comments, formatting, behavior-preserving internal refactors, low-impact developer tooling, or tests that do not alter product behavior.
 
-- documentation and comments;
-- formatting;
-- tests that do not change product behavior;
-- internal refactors with unchanged observable behavior;
-- low-impact developer tooling.
-
-Expected handling:
-
-- required GREEN gates pass;
-- no human approval solely for process compliance;
-- agent may merge/release only if repository policy permits it.
+Expected handling: required GREEN gates pass; no human approval solely for process compliance.
 
 ## YELLOW
 
-Typical examples:
+Typical examples: user-visible behavior, API contracts, additive schema changes, new dependencies, data transformations, significant UI/layout changes, or reversible external integration changes.
 
-- user-visible behavior changes;
-- API contract changes;
-- additive database/schema changes;
-- new dependencies;
-- data transformation logic;
-- significant UI/layout changes;
-- external integration changes that are reversible.
-
-Expected handling:
-
-- required YELLOW gates pass;
-- independent review is preferred;
-- human approval only when business behavior, UX consequences, or other non-automatable judgment remains.
+Expected handling: required YELLOW gates pass; independent review when uncertainty/consequence warrants it; human approval only for remaining business/UX tradeoffs.
 
 ## RED
 
-Typical examples:
+Typical examples: authentication/authorization, security controls, destructive/irreversible DB changes, sensitive-data exposure/retention, payments, production infrastructure/deployment policy, bulk external side effects, production-data deletion, or this harness's enforcement policy.
 
-- authentication or authorization boundaries;
-- security policy or security-control changes;
-- destructive/irreversible database changes;
-- personal/sensitive data exposure or retention changes;
-- payments/billing;
-- production infrastructure or deployment-policy changes;
-- bulk outbound email/messages or other high-impact external side effects;
-- deletion or irreversible mutation of production data;
-- changes to this harness's risk/verification enforcement itself.
-
-Expected handling:
-
-- required RED gates pass;
-- independent code/security review as applicable;
-- rollback/recovery evidence;
-- No-Guess Approval Packet before irreversible action/release;
-- explicit human go/no-go for the consequence, not for technical implementation details.
+Expected handling: required RED gates pass; relevant independent specialist review; rollback/recovery evidence; No-Guess Approval before irreversible action/release; explicit human go/no-go for the consequence.
 
 ## Expertise Gate
 
-Do not ask a non-expert reviewer to certify a technical claim they cannot reasonably evaluate.
-
-If the remaining decision genuinely requires specialist expertise:
-
-1. identify the missing expertise;
-2. seek independent evidence or expert review where available;
-3. otherwise choose a safer, standard, reversible design or postpone the risky action;
-4. do not convert uncertainty into a superficial human approval.
+Do not ask a non-expert to certify a technical claim they cannot reasonably evaluate. Identify missing expertise, seek independent evidence/expert review where available, otherwise choose a safer standard/reversible design or postpone the risky action.
 
 ## No-Guess Approval
 
-A human approval request must state:
-
-- exact decision requested;
-- why AI/machine checks cannot decide it;
-- minimum background knowledge;
-- user/business consequences;
-- verification evidence;
-- assumptions and unknowns;
-- worst case;
-- rollback/recovery;
-- alternatives;
-- recommendation;
-- strongest argument against that recommendation.
+A human approval request must state the exact decision, why AI/machine checks cannot decide it, minimum background knowledge, user/business consequences, verification evidence, assumptions/unknowns, worst case, rollback/recovery, alternatives, recommendation, and strongest argument against that recommendation.
