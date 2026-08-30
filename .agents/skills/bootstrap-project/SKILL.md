@@ -1,19 +1,17 @@
 ---
 name: bootstrap-project
-description: Adopt and configure this AI development harness for a new or existing software repository. Use when the template is first copied, ai/TEMPLATE_MODE exists, ai/commands.conf is unconfigured, or a project needs its product/architecture/security/design/reliability sources of truth initialized before agent-led development.
+description: Adopt and configure this AI development harness for a new or existing software repository. Use when the template is first copied, ai/TEMPLATE_MODE exists, commands are unconfigured, or project-specific sources of truth/context routing need initialization before agent-led development.
 ---
 
 # Bootstrap Project
 
-1. Read `AGENTS.md`, the existing repository structure, build/test configuration, and relevant existing docs.
-2. Identify the real stack and real commands. Do not invent package scripts, scanners, services, environment variables, or dependencies.
-3. Update `docs/PRODUCT.md`, `ARCHITECTURE.md`, `SECURITY.md`, `DESIGN.md`, and `RELIABILITY.md` with verified facts. Keep unresolved product decisions under `Open decisions` instead of guessing.
-4. Configure every field in `ai/commands.conf` required by the project. For a genuinely inapplicable gate, set a specific `_NA_REASON`. Do not use N/A merely because a check is inconvenient to set up.
-5. Set `PROJECT_READY=true` only after the commands and N/A decisions are accurate.
-6. Add missing deterministic checks when a critical invariant is currently prose-only and can reasonably be automated.
-7. Run `./scripts/ai/self-test` while `ai/TEMPLATE_MODE` is still present.
-8. Remove `ai/TEMPLATE_MODE`, then run `./scripts/ai/verify --risk green`.
-9. If verification fails, fix the harness/project configuration before product feature work begins.
-10. Summarize what is enforced automatically, what remains human judgment, and any blocking unknowns.
+1. Inspect the repository structure, real build/test configuration, and existing docs. Do not exhaustively read application code when metadata/config is enough.
+2. Identify the real stack and commands. Do not invent scripts, scanners, services, env vars, or dependencies.
+3. Update project docs with verified facts, keeping them concise. Record unresolved decisions instead of guessing.
+4. Update `ai/context-map.md` only where project-specific paths/domains differ materially from the generic map. The goal is to prevent agents from reading all docs for every task.
+5. Configure required fields in `ai/commands.conf`; use specific `_NA_REASON` only for genuinely inapplicable gates.
+6. Set `PROJECT_READY=true` only when commands/N/A decisions are accurate. Add deterministic checks for critical prose-only invariants when practical.
+7. Run `./scripts/ai/self-test` while `ai/TEMPLATE_MODE` exists. Remove the marker only when ready, then run `./scripts/ai/verify --risk green`.
+8. Summarize enforced checks, context-routing decisions, remaining human judgment, and blocking unknowns. Keep the summary compact.
 
 Do not implement unrelated product features during bootstrap.
