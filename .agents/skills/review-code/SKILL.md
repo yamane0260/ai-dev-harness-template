@@ -1,16 +1,15 @@
 ---
 name: review-code
-description: Perform an independent evidence-based review of a proposed code change. Use for YELLOW/RED work, before merge of meaningful changes, after a large agent implementation, or whenever a fresh-context reviewer is needed to detect regressions, spec drift, unnecessary complexity, missing tests, and architecture violations.
+description: Independently review a meaningful or high-consequence code change using a compact task packet and diff. Use for CRITICAL work, large/uncertain STANDARD changes, or when fresh-context review is likely to catch regressions, spec drift, missing tests, or unnecessary complexity.
 ---
 
 # Review Code
 
-Prefer a fresh agent/subagent/worktree context when the tool supports it.
+Prefer a fresh context. Start with the Task Packet, acceptance criteria, diff/changed paths, and verification summary. Do not read the whole repository or all docs by default.
 
-1. Read the spec/acceptance criteria first, then the complete diff and relevant call sites/tests.
-2. Check for: missing criteria, contradictory behavior, unrequested behavior, regressions, unsafe defaults, duplicated abstractions, dependency changes, error-path gaps, and architecture boundary violations.
-3. Verify that tests assert behavior rather than merely executing code. Watch for weakened/deleted assertions or excessive mocking that hides the real path.
-4. Run focused checks when a finding depends on runtime behavior.
-5. Separate actionable findings from preferences. Report severity, evidence, affected path, consequence, and a concrete correction.
-6. Do not approve merely because CI is green; compare against the requested behavior and repository policy.
-7. If no material findings remain, state what was reviewed and what evidence was used.
+1. Check requested behavior vs implementation: missing, contradictory, or unrequested behavior.
+2. Check regressions, unsafe defaults, error paths, unnecessary abstraction, dependency changes, and architecture violations only where relevant to the diff.
+3. Inspect nearby call sites/tests only when needed to validate a concrete concern.
+4. Run focused checks only when a finding depends on runtime behavior.
+5. Report actionable findings with severity, evidence, consequence, and correction. Separate them from preferences.
+6. If no material findings remain, state the evidence reviewed in a few lines.
