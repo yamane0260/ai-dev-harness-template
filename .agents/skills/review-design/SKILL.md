@@ -1,15 +1,15 @@
 ---
 name: review-design
-description: Review user-facing UI for product-specific visual quality, usability, responsiveness, accessibility, and obvious AI-generated design patterns. Use for pages/components that customers or stakeholders will see, especially marketing pages, dashboards, and major layout/style changes before release.
+description: Independently review meaningful user-facing visual changes for product-specific quality, usability, responsiveness, accessibility, and obvious AI-generated design patterns. Use for stakeholder-visible pages, major layout/style changes, or release-critical UI; skip for trivial non-visual edits.
 ---
 
 # Review Design
 
-1. Read `docs/DESIGN.md`, real brand/content assets, and any approved reference screens before judging aesthetics.
-2. Render the actual implementation. Review screenshots at representative viewport sizes; source inspection alone is not visual QA.
-3. Check information hierarchy, typography, spacing/rhythm, density, responsive behavior, interaction states, content authenticity, accessibility, and consistency with the project's visual system.
-4. Check for generic agent defaults that are not justified by the product: repetitive card grids, decorative pills/badges, arbitrary gradients/glow/glass effects, invented metrics/testimonials, generic marketing copy, or style choices based only on vague adjectives.
-5. Prefer project-specific content and layout logic over swapping one fashionable AI default for another.
-6. Compare with the chosen reference/source-of-truth where one exists. Fix the largest perceptual discrepancies first.
-7. Run the configured `visual` gate if available and record screenshots/evidence.
-8. Human review, when needed, should answer "Is this an acceptable product/brand outcome?" rather than inspect CSS implementation details.
+Use a fresh context when supported. Start with the Task Packet, rendered screenshots, changed UI paths, and `docs/DESIGN.md` plus approved references only when relevant.
+
+1. Judge the rendered result, not the entire source tree.
+2. Check hierarchy, typography, spacing/density, responsive states, accessibility, content authenticity, and consistency with the project's visual system.
+3. Check unjustified generic agent defaults such as repetitive card grids, decorative pills, arbitrary gradients/glow/glass, invented metrics/testimonials, or generic marketing copy.
+4. Inspect source only when needed to explain/fix a visible issue.
+5. Run the configured visual gate when available; keep screenshots/logs as artifacts and return a concise result.
+6. Human review, when needed, should answer whether the visible product/brand outcome is acceptable, not inspect CSS details.
