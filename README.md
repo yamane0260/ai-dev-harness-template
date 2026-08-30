@@ -1,169 +1,165 @@
-# AI Dev Harness Template
+# AI Dev Harness Template — Context-efficient V2
 
-A tool-portable starter repository for AI-led software development with high automation, machine-verifiable quality gates, explicit risk classification, and human approval that does not depend on guesswork.
+A tool-portable starter for AI-led software development that balances **quality, trust, and context efficiency**.
 
-The core is intentionally independent of a particular coding agent. Codex, Cursor, Claude Code, and future agents should all read the same repository policy and run the same scripts.
+The repository, not the chat history, is the system of record. Codex, Cursor, Claude Code, and future agents should use the same project knowledge, deterministic checks, risk policy, and compact task handoffs.
 
-## What this repository provides
+## V2 principles
 
-- `AGENTS.md`: short repository map and non-negotiable rules.
-- `.agents/skills/`: portable Agent Skills for project bootstrap, implementation, debugging, verification, code/security/design review, approval preparation, and release.
-- `docs/`: project-specific product, architecture, security, design, and reliability sources of truth.
-- `ai/policies/`: risk and quality-gate policy.
-- `ai/commands.conf`: project-specific deterministic verification commands.
-- `scripts/ai/`: portable shell entry points that agents and CI run.
-- `.github/workflows/verify.yml`: CI enforcement.
-- `.github/pull_request_template.md`: evidence-first PR structure.
+1. **One task = one fresh top-level session** whenever practical.
+2. **One primary workflow Skill** (`develop-feature`) for normal product work; avoid mechanical Skill chaining.
+3. **Read only relevant context.** `ai/context-map.md` routes tasks to the smallest useful set of docs.
+4. **Delegate exploration early, not only testing.** STANDARD/CRITICAL work should move broad read-only exploration to a fresh subagent/context when supported.
+5. **Return compact Task Packets, not transcripts.** `ai/templates/task-packet.md` is the handoff contract.
+6. **Keep raw logs/artifacts out of the main context.** Deterministic scripts write evidence to files and return concise summaries.
+7. **Use specialist reviewers only when triggered.** Security/design/code review is not ceremony for trivial work.
+8. **Human approval remains No-Guess Approval.** Humans judge consequences/tradeoffs, not technical claims they cannot verify.
 
-## Core model
+## Two separate classifications
 
-```text
-Human intent / business judgment / visual taste
-                     |
-                     v
-              Agent implementation
-                     |
-                     v
-        Deterministic verification evidence
-                     |
-          +----------+----------+
-          |                     |
-     Independent review     Risk review
-          |                     |
-          +----------+----------+
-                     |
-                     v
-             Human-ready approval
-              only when needed
-```
+### Work mode — controls orchestration/context
 
-## Start a new project
+- **MICRO**: obvious local, reversible change. Main agent may explore/implement directly; no ceremonial spec or independent review.
+- **STANDARD**: normal feature/behavior change. Prefer early delegated exploration and a compact Task Packet.
+- **CRITICAL**: security/data/production/high-consequence work. Use fresh-context exploration plus independent specialist review where supported.
 
-1. Create a new private repository from this template, or copy this repository into an existing project.
-2. Ask the agent to run the `bootstrap-project` skill.
-3. The agent must inspect the actual stack and fill `ai/commands.conf` with commands that really exist. It must not invent commands.
-4. Fill or refine the files under `docs/`.
-5. Remove `ai/TEMPLATE_MODE` only when the project verification configuration is ready.
-6. Run:
+### Risk — controls evidence/release requirements
 
-```sh
-./scripts/ai/self-test
-./scripts/ai/verify --risk green
-```
+- **GREEN**: low-impact/reversible.
+- **YELLOW**: user-visible/contracts/data/dependencies/integrations.
+- **RED**: auth/security boundaries, destructive data, payments, production, personal data, high-impact side effects, or harness enforcement changes.
 
-The project is not considered adopted until both commands pass.
+Work mode and risk are related but not identical. A small auth change may be MICRO in code size but CRITICAL/RED in consequence.
 
-## Daily feature workflow
+## Repository layout
 
 ```text
-request
-  -> develop-feature
-  -> acceptance criteria
-  -> risk classification
-  -> implementation + tests
-  -> verify-work
-  -> independent review where required
-  -> prepare-approval only if human judgment remains
-  -> release-change
+AGENTS.md                  # short map + hard rules
+CLAUDE.md                  # thin adapter importing AGENTS.md
+
+docs/                      # project sources of truth
+  PRODUCT.md
+  ARCHITECTURE.md
+  SECURITY.md
+  DESIGN.md
+  RELIABILITY.md
+  specs/
+
+.agents/skills/            # portable Agent Skills
+  bootstrap-project/
+  develop-feature/
+  verify-work/
+  debug-systematically/
+  review-code/
+  review-security/
+  review-design/
+  prepare-approval/
+  release-change/
+
+ai/
+  context-map.md            # what to read for each area
+  commands.conf             # real project verification commands
+  policies/
+  templates/
+    task-packet.md          # compact agent-to-agent handoff
+    approval-packet.md
+  evals/
+
+scripts/ai/
+  self-test
+  classify-risk
+  verify
+  validate-approval
 ```
 
-## Risk levels
+## Bootstrap a real project
 
-- **GREEN**: low-impact, reversible work that is well covered by deterministic checks. May be agent-only after gates pass.
-- **YELLOW**: user-visible or contract/data/dependency changes. Requires stronger automated evidence and usually independent AI review. Human approval is required only for remaining business/UX consequences.
-- **RED**: security boundaries, auth/permissions, destructive data operations, payments, production infrastructure, personal data, bulk external side effects, or policy/harness changes. Requires the full gate set and a human-ready approval packet before irreversible action or release.
+After creating a project from this template, ask the agent:
 
-See `ai/policies/risk-policy.md` for the complete policy.
+```text
+Use bootstrap-project. Inspect the actual repository and configure this harness without inventing commands or dependencies. Keep project docs concise, adapt ai/context-map.md only where the real codebase needs project-specific routing, configure ai/commands.conf, remove ai/TEMPLATE_MODE only when ready, then run ./scripts/ai/self-test and ./scripts/ai/verify --risk green. Do not implement product features in this task.
+```
 
-## Human approval rule: No-Guess Approval
+## Normal development prompt
 
-A human must never be asked to approve something they would have to guess about.
+```text
+Use develop-feature for this request. Optimize for context efficiency: classify MICRO/STANDARD/CRITICAL, use ai/context-map.md, delegate broad read-only exploration before implementation when useful, and keep parent context to a compact Task Packet plus final evidence. Run deterministic verification before completion. Do not ask me to approve technical correctness.
+```
 
-Before requesting approval, the agent must explain:
+### Expected flow
 
-- the exact decision the human is being asked to make;
-- why human judgment is necessary;
-- the minimum background knowledge required;
-- user/business consequences in plain language;
-- deterministic evidence already collected;
-- assumptions and unknowns;
-- worst-case impact;
-- rollback/recovery;
-- alternatives;
-- the strongest argument against the agent's recommendation.
-
-Use `ai/templates/approval-packet.md` and the `prepare-approval` skill.
+```text
+User request
+    |
+    v
+Thin main/coordinator
+    |
+    +-- MICRO ----> focused edit -> deterministic verify
+    |
+    +-- STANDARD -> explorer -> compact Task Packet -> implement -> verify
+    |
+    +-- CRITICAL -> explorer -> Task Packet -> implement -> verify
+                                      |              |
+                                      +--> fresh specialist review(s)
+                                                     |
+                                                approval if real
+                                                human judgment remains
+```
 
 ## Cursor
 
-Cursor supports root/nested `AGENTS.md` and discovers project Agent Skills under `.agents/skills/`. Open the repository as a trusted workspace; the rules and skills are then available to Agent.
+Open the repository as the workspace. Cursor can discover repository instructions/Skills; use built-in or custom subagents primarily for **broad exploration and independent review**, not merely for running test commands.
 
-First adoption prompt:
+Recommended operating pattern:
 
-```text
-Use the bootstrap-project skill. Inspect this repository and configure the AI development harness for the actual stack. Do not invent commands or dependencies. Populate the project docs with evidence from the repo, configure ai/commands.conf, remove ai/TEMPLATE_MODE only when ready, then run ./scripts/ai/self-test and ./scripts/ai/verify --risk green. Do not implement product features in this task.
-```
-
-For ordinary work:
-
-```text
-Use develop-feature for this request. Follow the repository risk policy, run fresh verification, and do not ask me to approve technical correctness. If human judgment is needed, produce a No-Guess Approval Packet.
-```
-
-Cursor can invoke a skill explicitly from the Agent UI by typing `/` and selecting the skill name.
-
-Official references:
-- https://cursor.com/docs/skills
-- https://cursor.com/docs/rules
-- https://cursor.com/docs/hooks
+- start a fresh chat for each task;
+- for STANDARD/CRITICAL work, ask an Explore subagent to return only the Task Packet;
+- let the implementer open only the files listed in that packet;
+- run `./scripts/ai/verify` directly for deterministic checks;
+- use a fresh reviewer only when the change warrants independent reasoning;
+- inspect Cursor's context-usage UI periodically to verify that Rules/Skills/MCP/subagents are not dominating context.
 
 ## Codex
 
-Install the Codex CLI if needed:
+Start from the repository root and prefer a fresh task/session (and branch/worktree for meaningful work). `AGENTS.md` stays intentionally small; project Skills live under `.agents/skills/`.
+
+Recommended operating pattern:
+
+- one task per fresh Codex session whenever practical;
+- avoid growing a long parent session and then spawning many children from it;
+- use delegation for context-heavy read-only exploration when supported, but pass compact Task Packets between contexts;
+- for independent review, a fresh session/worktree is often preferable to inheriting a very large parent history;
+- run the same deterministic `scripts/ai/*` checks regardless of which agent performed the implementation.
+
+## Deterministic verification
 
 ```sh
-npm install -g @openai/codex
+./scripts/ai/self-test
+./scripts/ai/classify-risk
+./scripts/ai/verify --risk green
+./scripts/ai/verify --risk yellow
+./scripts/ai/verify --risk red
 ```
 
-Then start Codex from the repository root:
+Raw command output is stored under `.ai-artifacts/verification/`; agents should read the generated summary first and inspect raw logs only for targeted failures.
 
-```sh
-cd /path/to/project
-codex
-```
+## No-Guess Approval
 
-Codex reads hierarchical `AGENTS.md` instructions and repository skills under `.agents/skills/`. Use the same bootstrap prompt shown above. Skills may be selected explicitly from Codex's skill selector or triggered by their descriptions.
+Human approval must state the exact business/product/risk decision, why human judgment is required, minimum background, verified evidence, assumptions/unknowns, worst case, rollback, alternatives, recommendation, and strongest argument against it.
 
-For long agent-led tasks, prefer a branch/worktree and require `./scripts/ai/verify` before asking to merge.
+If a blocking unknown remains, do not release. If a reviewer would need specialist expertise they do not have, do not turn that uncertainty into a cosmetic approval.
 
-Official references:
-- https://openai.com/codex/
-- https://openai.com/index/unrolling-the-codex-agent-loop/
-- https://github.com/openai/codex
+## Portability
 
-## GitHub settings to enable after creating a real project
-
-Recommended baseline for `main`:
-
-- block direct agent pushes to `main`;
-- require pull requests for YELLOW/RED work;
-- require the `verify` GitHub Actions check;
-- keep deployment secrets in GitHub Environments or the deployment platform, not in the repository;
-- require a human approval step for irreversible RED production actions.
-
-Do not create approval bureaucracy for GREEN work that is already machine-verifiable.
-
-## Portability principle
-
-Treat AI products as replaceable adapters. Keep durable assets in the repository:
+Treat AI products as replaceable adapters:
 
 ```text
-Portable knowledge     -> docs/, AGENTS.md
-Portable workflows     -> .agents/skills/
-Portable enforcement   -> scripts/ai/, CI
-Portable risk policy   -> ai/policies/
-Portable evaluation    -> ai/evals/
-Tool-specific adapters -> .cursor/, .codex/, .claude/ only when needed
+knowledge       -> docs/, AGENTS.md
+workflow        -> .agents/skills/
+context routing -> ai/context-map.md + task-packet.md
+enforcement     -> scripts/ai/ + CI
+risk policy     -> ai/policies/
+evaluation      -> ai/evals/
 ```
 
-When adopting a new agent in the future, first connect it to these repository assets rather than rewriting the development process for that agent.
+The goal is to change AI tools without rewriting the development contract or losing quality controls.
