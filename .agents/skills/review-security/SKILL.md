@@ -1,17 +1,15 @@
 ---
 name: review-security
-description: Review security-sensitive code and data-boundary changes using deterministic scanners plus independent reasoning. Use for authentication, authorization, personal/sensitive data, uploads, external URLs, secrets, dependencies, serialization, database permissions/migrations, payments, or any RED security boundary change.
+description: Independently review security-sensitive changes with minimal relevant context plus deterministic evidence. Use for authentication, authorization, sensitive data, uploads, external URLs, secrets, dependencies, database permissions/migrations, payments, or other RED security-boundary changes.
 ---
 
 # Review Security
 
-Prefer a reviewer independent from the implementation context.
+Use a fresh context when supported. Start from the Task Packet, security-relevant diff, `docs/SECURITY.md` only when applicable, and current scanner/test summaries.
 
-1. Map trust boundaries and identify attacker/user-controlled inputs.
-2. Review authentication and authorization separately. Confirm server-side enforcement and cross-user/cross-tenant denial paths.
-3. Review validation, injection, SSRF/external URL access, path handling, file uploads, unsafe deserialization, XSS/output encoding, secrets, and sensitive logging as applicable.
-4. Review new/changed dependencies. Verify packages actually exist and use the configured dependency/security scanners.
-5. For database changes, examine permissions, destructive behavior, transactionality, migration compatibility, and rollback/forward recovery.
-6. Run the configured `security` and `dependency` gates and relevant integration tests. Re-run scanners after fixes.
-7. Treat the same agent writing both critical security code and its only tests as insufficient evidence; seek an independent pass or deterministic control.
-8. Report residual risk and blocking unknowns explicitly. Do not issue a cosmetic approval when specialist expertise is genuinely required.
+1. Identify only the trust boundaries and attacker-controlled inputs affected by the change.
+2. Check authn/authz, validation/injection, external URL/file handling, secrets/logging, dependencies, and DB permissions/migrations as applicable; do not run an irrelevant full checklist.
+3. Inspect targeted surrounding code only when needed to prove or reject a concern.
+4. Use configured security/dependency/integration checks; re-run after fixes when evidence changed.
+5. Treat same-agent critical code plus its only tests as insufficient evidence when an independent control is practical.
+6. Return material findings, residual risk, and blocking unknowns concisely. Escalate genuinely specialist questions rather than asking for cosmetic human approval.
