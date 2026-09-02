@@ -12,16 +12,25 @@ required=(
   "docs/DESIGN.md"
   "docs/UX.md"
   "docs/RELIABILITY.md"
+  "docs/changes/README.md"
+  "docs/decisions/README.md"
+  "docs/concepts/README.md"
+  "docs/runbooks/README.md"
   "ai/context-map.md"
   "ai/quality-envelope.md"
   "ai/policies/risk-policy.md"
   "ai/policies/quality-gates.md"
+  "ai/policies/human-legibility.md"
   "ai/commands.conf"
   "ai/templates/task-packet.md"
   "ai/templates/quality-impact.md"
   "ai/templates/ux-contract.md"
+  "ai/templates/change-record.md"
+  "ai/templates/change-brief.md"
+  "ai/templates/runbook.md"
   "ai/templates/approval-packet.md"
   "ai/evals/quality-envelope/README.md"
+  "ai/evals/human-legibility/README.md"
   "scripts/ai/classify-risk"
   "scripts/ai/verify"
   "scripts/ai/validate-approval"
@@ -38,7 +47,7 @@ done
 skills=(
   bootstrap-project develop-feature verify-work debug-systematically
   spec-gap-preflight review-code review-security review-ux review-design
-  prepare-approval release-change
+  explain-change review-legibility prepare-approval release-change
 )
 for skill in "${skills[@]}"; do
   file=".agents/skills/$skill/SKILL.md"
@@ -64,7 +73,6 @@ for script in scripts/ai/self-test scripts/ai/classify-risk scripts/ai/verify sc
   fi
 done
 
-# A real product must not accidentally keep the template bypass marker.
 if [[ -f ai/TEMPLATE_MODE ]]; then
   markers=(package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle build.gradle.kts)
   for marker in "${markers[@]}"; do

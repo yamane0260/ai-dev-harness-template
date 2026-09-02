@@ -1,67 +1,71 @@
-# AI Dev Harness Template — Context-efficient V2
+# AI Dev Harness Template — Context-efficient V2.3
 
-A tool-portable starter for AI-led software development that balances **quality, trust, and context efficiency**.
+A tool-portable starter for AI-led software development that balances **quality, trust, context efficiency, and human legibility**.
 
-The repository, not the chat history, is the system of record. Codex, Cursor, Claude Code, and future agents should use the same project knowledge, deterministic checks, risk policy, and compact task handoffs.
+The repository, not chat history, is the system of record. Codex, Cursor, Claude Code, and future agents should use the same project knowledge, deterministic checks, risk policy, compact task handoffs, and durable change records.
 
-## V2 principles
+## Core principles
 
-1. **One task = one fresh top-level session** whenever practical.
-2. **One primary workflow Skill** (`develop-feature`) for normal product work; avoid mechanical Skill chaining.
-3. **Read only relevant context.** `ai/context-map.md` routes tasks to the smallest useful set of docs.
-4. **Delegate exploration early, not only testing.** STANDARD/CRITICAL work should move broad read-only exploration to a fresh subagent/context when supported.
-5. **Return compact Task Packets, not transcripts.** `ai/templates/task-packet.md` is the handoff contract.
-6. **Keep raw logs/artifacts out of the main context.** Deterministic scripts write evidence to files and return concise summaries.
-7. **Use specialist reviewers only when triggered.** Security/design/code review is not ceremony for trivial work.
-8. **Human approval remains No-Guess Approval.** Humans judge consequences/tradeoffs, not technical claims they cannot verify.
+1. One task = one fresh top-level session whenever practical.
+2. `develop-feature` is the primary workflow Skill; avoid mechanical Skill chaining.
+3. Read only relevant context via `ai/context-map.md`.
+4. Delegate broad exploration early; return compact Task Packets, not transcripts.
+5. Quality Envelope catches cases where the functional spec can pass but the product/system is still wrong.
+6. Raw logs/transcripts stay out of the main context and durable human docs; keep evidence as artifacts/telemetry where appropriate.
+7. Human approval and human understanding are separate. Do not interrupt work merely because the implementation uses unfamiliar knowledge.
+8. Human Legibility is proportional: LOW leaves a short breadcrumb; MATERIAL/CRITICAL leaves durable evidence a fresh maintainer can use.
 
-## Two separate classifications
+## Four independent classifications
 
-### Work mode — controls orchestration/context
+- **Work mode** — MICRO / STANDARD / CRITICAL: orchestration/context.
+- **Risk** — GREEN / YELLOW / RED: evidence/release controls.
+- **Quality Impact** — routes UX/security/data/reliability/etc. checks.
+- **Knowledge Impact** — NONE / LOW / MATERIAL / CRITICAL: durable human-understanding requirements.
 
-- **MICRO**: obvious local, reversible change. Main agent may explore/implement directly; no ceremonial spec or independent review.
-- **STANDARD**: normal feature/behavior change. Prefer early delegated exploration and a compact Task Packet.
-- **CRITICAL**: security/data/production/high-consequence work. Use fresh-context exploration plus independent specialist review where supported.
-
-### Risk — controls evidence/release requirements
-
-- **GREEN**: low-impact/reversible.
-- **YELLOW**: user-visible/contracts/data/dependencies/integrations.
-- **RED**: auth/security boundaries, destructive data, payments, production, personal data, high-impact side effects, or harness enforcement changes.
-
-Work mode and risk are related but not identical. A small auth change may be MICRO in code size but CRITICAL/RED in consequence.
+A small code change may be high-risk; a safe change may still have MATERIAL knowledge impact. Do not conflate the axes.
 
 ## Repository layout
 
 ```text
-AGENTS.md                  # short map + hard rules
-CLAUDE.md                  # thin adapter importing AGENTS.md
+AGENTS.md
 
-docs/                      # project sources of truth
+docs/
   PRODUCT.md
   ARCHITECTURE.md
   SECURITY.md
   DESIGN.md
+  UX.md
   RELIABILITY.md
   specs/
+  changes/       # historical material Change Briefs
+  decisions/     # durable important decisions
+  concepts/      # canonical project-specific concepts
+  runbooks/      # current operational procedures
 
-.agents/skills/            # portable Agent Skills
+.agents/skills/
   bootstrap-project/
   develop-feature/
-  verify-work/
-  debug-systematically/
+  spec-gap-preflight/
   review-code/
   review-security/
+  review-ux/
   review-design/
+  explain-change/
+  review-legibility/
   prepare-approval/
   release-change/
 
 ai/
-  context-map.md            # what to read for each area
-  commands.conf             # real project verification commands
+  context-map.md
+  quality-envelope.md
+  commands.conf
   policies/
+    human-legibility.md
   templates/
-    task-packet.md          # compact agent-to-agent handoff
+    task-packet.md
+    change-record.md
+    change-brief.md
+    runbook.md
     approval-packet.md
   evals/
 
@@ -72,66 +76,51 @@ scripts/ai/
   validate-approval
 ```
 
-## Bootstrap a real project
-
-After creating a project from this template, ask the agent:
+## Normal development flow
 
 ```text
-Use bootstrap-project. Inspect the actual repository and configure this harness without inventing commands or dependencies. Keep project docs concise, adapt ai/context-map.md only where the real codebase needs project-specific routing, configure ai/commands.conf, remove ai/TEMPLATE_MODE only when ready, then run ./scripts/ai/self-test and ./scripts/ai/verify --risk green. Do not implement product features in this task.
+request
+  -> work/risk/quality routing
+  -> focused exploration + Task Packet
+  -> implementation
+  -> deterministic verification
+  -> targeted specialist review when triggered
+  -> Knowledge Impact classification
+       NONE     -> nothing extra
+       LOW      -> short inline Change Record
+       MATERIAL -> Change Brief -> fresh legibility review
+       CRITICAL -> Change Brief + applicable runbook -> fresh legibility review
+  -> approval only if a real human decision remains
 ```
 
-## Normal development prompt
+### Human Legibility
+
+The goal is not to make humans watch the agent work. The goal is to make the system understandable **after** autonomous work completes.
+
+For MATERIAL/CRITICAL changes, `explain-change` generates records from observable evidence: diff, tests, config, recorded decisions, and current docs. Material rationale is labeled:
+
+- `RECORDED` — explicitly captured during the task;
+- `DERIVED` — directly supported by durable evidence;
+- `INFERRED` — after-the-fact interpretation, never presented as historical fact.
+
+`review-legibility` performs the **AI Absence Test** in a fresh context without the original transcript: can a maintainer explain what changed, why, critical invariants, where to modify it, and how to diagnose/recover? A CRITICAL blocking readiness gap prevents release, but does not automatically create a human approval request.
+
+## Bootstrap
+
+After creating a real project from this template, use `bootstrap-project`. Configure real project commands/docs without inventing dependencies or checks, remove `ai/TEMPLATE_MODE` only when ready, then run:
+
+```sh
+./scripts/ai/self-test
+./scripts/ai/verify --risk green
+```
+
+## Suggested normal prompt
 
 ```text
-Use develop-feature for this request. Optimize for context efficiency: classify MICRO/STANDARD/CRITICAL, use ai/context-map.md, delegate broad read-only exploration before implementation when useful, and keep parent context to a compact Task Packet plus final evidence. Run deterministic verification before completion. Do not ask me to approve technical correctness.
+Use develop-feature for this request. Optimize for context efficiency and apply the Quality Envelope. Keep exploration in compact Task Packets. After verification, classify Knowledge Impact under the Human Legibility policy: do not interrupt me for explanation, but leave proportional durable records for material knowledge changes. Do not ask me to approve technical correctness.
 ```
 
-### Expected flow
-
-```text
-User request
-    |
-    v
-Thin main/coordinator
-    |
-    +-- MICRO ----> focused edit -> deterministic verify
-    |
-    +-- STANDARD -> explorer -> compact Task Packet -> implement -> verify
-    |
-    +-- CRITICAL -> explorer -> Task Packet -> implement -> verify
-                                      |              |
-                                      +--> fresh specialist review(s)
-                                                     |
-                                                approval if real
-                                                human judgment remains
-```
-
-## Cursor
-
-Open the repository as the workspace. Cursor can discover repository instructions/Skills; use built-in or custom subagents primarily for **broad exploration and independent review**, not merely for running test commands.
-
-Recommended operating pattern:
-
-- start a fresh chat for each task;
-- for STANDARD/CRITICAL work, ask an Explore subagent to return only the Task Packet;
-- let the implementer open only the files listed in that packet;
-- run `./scripts/ai/verify` directly for deterministic checks;
-- use a fresh reviewer only when the change warrants independent reasoning;
-- inspect Cursor's context-usage UI periodically to verify that Rules/Skills/MCP/subagents are not dominating context.
-
-## Codex
-
-Start from the repository root and prefer a fresh task/session (and branch/worktree for meaningful work). `AGENTS.md` stays intentionally small; project Skills live under `.agents/skills/`.
-
-Recommended operating pattern:
-
-- one task per fresh Codex session whenever practical;
-- avoid growing a long parent session and then spawning many children from it;
-- use delegation for context-heavy read-only exploration when supported, but pass compact Task Packets between contexts;
-- for independent review, a fresh session/worktree is often preferable to inheriting a very large parent history;
-- run the same deterministic `scripts/ai/*` checks regardless of which agent performed the implementation.
-
-## Deterministic verification
+## Verification and evidence
 
 ```sh
 ./scripts/ai/self-test
@@ -141,25 +130,23 @@ Recommended operating pattern:
 ./scripts/ai/verify --risk red
 ```
 
-Raw command output is stored under `.ai-artifacts/verification/`; agents should read the generated summary first and inspect raw logs only for targeted failures.
+Raw verification output belongs under `.ai-artifacts/`; read summaries first. Audit telemetry/transcripts should remain separate from human-facing docs and must not be committed when they may contain sensitive/transient data.
 
 ## No-Guess Approval
 
-Human approval must state the exact business/product/risk decision, why human judgment is required, minimum background, verified evidence, assumptions/unknowns, worst case, rollback, alternatives, recommendation, and strongest argument against it.
-
-If a blocking unknown remains, do not release. If a reviewer would need specialist expertise they do not have, do not turn that uncertainty into a cosmetic approval.
+Approval packets remain only for genuine business/product/risk decisions. `READINESS` is not `APPROVAL`: a change may require a runbook or legibility evidence while needing no human go/no-go.
 
 ## Portability
 
-Treat AI products as replaceable adapters:
-
 ```text
-knowledge       -> docs/, AGENTS.md
-workflow        -> .agents/skills/
-context routing -> ai/context-map.md + task-packet.md
-enforcement     -> scripts/ai/ + CI
-risk policy     -> ai/policies/
-evaluation      -> ai/evals/
+current knowledge   -> docs/ + AGENTS.md
+historical knowledge-> docs/changes + docs/decisions
+operational knowledge -> docs/runbooks
+workflow            -> .agents/skills/
+context routing     -> ai/context-map.md + task-packet.md
+enforcement         -> scripts/ai/ + CI
+quality routing     -> ai/quality-envelope.md
+human legibility    -> ai/policies/human-legibility.md
 ```
 
-The goal is to change AI tools without rewriting the development contract or losing quality controls.
+The original AI session should be disposable. The repository should remain understandable and operable without it.

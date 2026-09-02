@@ -1,42 +1,44 @@
 # AI Development Harness
 
-Optimize for correctness, real-world quality, and context efficiency. Keep the main agent focused on intent, decisions, a compact task packet, and final evidence.
+Optimize for correctness, real-world quality, context efficiency, and durable human understanding. Keep the main agent focused on intent, decisions, a compact task packet, and final evidence.
 
 ## Start here
 
 - New/adopted repo: use `bootstrap-project`.
 - Product change: use `develop-feature` as the primary workflow skill.
-- Before non-trivial implementation, apply the Quality Envelope in `ai/quality-envelope.md`; use `spec-gap-preflight` when triggered.
-- Read `ai/context-map.md` before loading project docs. Load only docs relevant to the touched area and Quality Impact Vector.
+- Before non-trivial implementation, apply `ai/quality-envelope.md`; use `spec-gap-preflight` when triggered.
+- Read `ai/context-map.md` before loading project docs.
+- Human understanding policy: `ai/policies/human-legibility.md`.
 - Deterministic checks live in `scripts/ai/`; project commands live in `ai/commands.conf`.
 
-## Work modes
+## Independent classifications
 
-- **MICRO**: local, reversible, low-risk change. Main agent may explore/implement directly. No ceremonial spec or independent review.
-- **STANDARD**: normal feature/behavior change. Delegate context-heavy read-only exploration when supported; return a compact Task Packet, then implement.
-- **CRITICAL**: security/data/production/high-consequence change. Use fresh-context exploration and independent specialist review where supported.
+- **Work mode** — MICRO / STANDARD / CRITICAL: controls context/orchestration.
+- **Risk** — GREEN / YELLOW / RED: controls evidence/release requirements.
+- **Quality Impact** — routes only relevant nonfunctional domains.
+- **Knowledge Impact** — NONE / LOW / MATERIAL / CRITICAL: controls durable human-understanding records.
 
-Risk (`GREEN/YELLOW/RED`) controls evidence. Work mode controls context/orchestration. Quality Impact controls which nonfunctional domains must be considered.
+Do not raise one classification merely because another is high; use its own definition.
 
 ## Context rules
 
 - Prefer one task per fresh top-level session.
-- Do not read all docs by default; use `ai/context-map.md` and the Quality Impact Vector.
+- Load only docs relevant to touched paths and material quality/knowledge impacts.
 - Delegate broad exploration before implementation when it would pollute the main context.
-- Explorer/preflight output should be compact: goal, criteria, relevant files, relevant quality domains, constraints, risk/unknowns, next action.
-- Keep raw logs, broad search results, screenshots, and large file dumps out of the main context. Persist evidence and return paths plus concise summaries.
-- Do not chain Skills mechanically. Invoke specialist review only when its trigger applies.
+- Keep raw logs, transcripts, screenshots, and large dumps out of the main context and durable human docs; persist evidence separately and return concise summaries/paths.
+- Do not chain Skills mechanically. Specialist review/legibility Skills run only when triggered.
 
 ## Hard rules
 
 - Never claim success without fresh verification evidence from the current revision.
 - Never weaken/delete/skip a failing check merely to get green status.
-- Never invent commands, dependencies, APIs, data, environment variables, or product requirements.
-- Functional-spec compliance is not sufficient when a material UX, security, data, compatibility, reliability, operability, performance/cost, privacy, architecture, accessibility, or supply-chain risk remains.
-- Add negative/invariant criteria for material cases: what must never happen, failure behavior, cross-user behavior, duplicates/concurrency, compatibility, recovery, and resource limits.
-- Prefer the smallest change that satisfies observable acceptance criteria and the relevant Quality Envelope.
-- Human approval is for desired consequences and real tradeoffs, not for guessing about technical correctness.
-- If a blocking unknown remains, do not release.
+- Never invent commands, dependencies, APIs, data, environment variables, product requirements, or historical rationale.
+- Functional-spec compliance is insufficient when a material Quality Envelope gap remains.
+- Add negative/invariant criteria where failure, cross-user behavior, duplicates/concurrency, compatibility, recovery, or resource limits matter.
+- For MATERIAL/CRITICAL Knowledge Impact, leave durable evidence that a fresh maintainer can understand the change without the original AI session.
+- Label material rationale `RECORDED`, `DERIVED`, or `INFERRED`; never present post-hoc inference as historical fact.
+- Human approval is for desired consequences/tradeoffs, not unfamiliar technology or documentation readiness alone.
+- If a blocking unknown or CRITICAL readiness gap remains, do not release.
 
 ## Commands
 

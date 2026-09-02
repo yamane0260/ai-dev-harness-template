@@ -1,6 +1,6 @@
 # Task Packet
 
-Use this format when handing context from an explorer/coordinator/preflight to an implementer or reviewer. Keep it compact; normally 15–30 lines plus file paths.
+Use when handing context from an explorer/coordinator/preflight to an implementer or reviewer. Keep it compact; normally 15–30 lines plus paths.
 
 ## Goal
 One sentence describing the requested outcome.
@@ -16,20 +16,13 @@ One sentence describing the requested outcome.
 - Only constraints that materially affect this task.
 
 ## Quality Impact Vector
-- UX: NONE / LOW / MATERIAL / CRITICAL
-- Security: ...
-- Data integrity: ...
-- Compatibility/migration: ...
-- Reliability: ...
-- Operability: ...
-- Performance/cost/quota: ...
-- Privacy: ...
-- Architecture/maintainability: ...
-- Accessibility: ...
-- Supply chain: ...
-- UI Impact: NONE / COSMETIC / INTERACTION / STRUCTURAL
+List only MATERIAL/CRITICAL domains with one short reason. UI Impact: NONE / COSMETIC / INTERACTION / STRUCTURAL.
 
-Omit explanation for `NONE`; give one short reason for MATERIAL/CRITICAL entries.
+## Knowledge Impact (provisional)
+- NONE / LOW / MATERIAL / CRITICAL
+- Reason only for MATERIAL/CRITICAL: what new knowledge a future maintainer may need.
+
+Final Knowledge Impact is confirmed after implementation; do not create docs from a speculative provisional classification.
 
 ## Existing pattern to follow
 - Existing implementation/reference path, if any.
@@ -45,4 +38,4 @@ Omit explanation for `NONE`; give one short reason for MATERIAL/CRITICAL entries
 ## Recommended next action
 One short instruction to the receiving agent.
 
-Do not include broad search transcripts, full file contents, raw test logs, screenshots, or general repository history. The receiving agent should open only the listed files and expand context only when evidence requires it.
+Do not include broad search transcripts, full files, raw logs/screenshots, hidden reasoning, or general repository history. Open only listed evidence and expand context when required.

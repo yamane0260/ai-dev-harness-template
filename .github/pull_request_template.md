@@ -4,38 +4,47 @@
 
 ## Spec / acceptance criteria
 
-<!-- Link to docs/specs/... or list concise positive + material negative/invariant criteria. -->
+<!-- Link to spec or list concise positive + material negative/invariant criteria. -->
 
 ## Work mode / risk
 
 - Mode: <!-- MICRO/STANDARD/CRITICAL -->
 - Deterministic floor: <!-- GREEN/YELLOW/RED -->
-- Final risk: <!-- GREEN/YELLOW/RED; agents may raise, not silently lower -->
+- Final risk: <!-- GREEN/YELLOW/RED -->
 - Reason:
 
 ## Quality Envelope
 
 <!-- List only MATERIAL/CRITICAL domains; "None" is valid. -->
-- Material domains: <!-- UX, Security, Data integrity, Compatibility, Reliability, Operability, Performance/Cost, Privacy, Architecture, Accessibility, Supply chain -->
+- Material domains:
 - UI Impact: <!-- NONE/COSMETIC/INTERACTION/STRUCTURAL -->
 - UX Contract: <!-- path/link or N/A -->
 
 ## Verification
 
-<!-- Paste the latest ./scripts/ai/verify summary or link to CI. -->
+<!-- Latest ./scripts/ai/verify summary or CI. -->
 
 ## Targeted independent review
 
-- [ ] Not required for this change
+- [ ] Not required
 - [ ] Code review completed
 - [ ] Security review completed
 - [ ] UX task audit completed
 - [ ] Design/visual review completed
 
+## Human Legibility
+
+- Knowledge Impact: <!-- NONE/LOW/MATERIAL/CRITICAL -->
+- Knowledge delta: <!-- one sentence or None -->
+- Change Brief: <!-- path/link or N/A -->
+- Current concept/decision/runbook updated: <!-- path/link or N/A -->
+- Legibility review: <!-- PASS / NEEDS-DOC-FIX / BLOCKING-READINESS-GAP / N/A -->
+- Human attention: <!-- RECORD / AWARE / READINESS -->
+
 ## Human judgment
 
-- [ ] No human judgment remains; automated evidence and policy determine acceptability
-- [ ] Approval Packet attached below or linked
+- [ ] No human judgment remains; automated evidence/policy determine acceptability
+- [ ] Approval Packet attached/linked
 
 Approval Packet: <!-- path/link or N/A -->
 
@@ -45,4 +54,4 @@ Approval Packet: <!-- path/link or N/A -->
 
 ## Rollback / recovery
 
-<!-- Required when the relevant risk/domain makes recovery material. -->
+<!-- Required when relevant risk/domain makes recovery material. -->
