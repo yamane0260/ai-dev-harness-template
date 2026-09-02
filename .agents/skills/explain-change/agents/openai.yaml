@@ -1,0 +1,3 @@
+interface:
+  display_name: "Explain Change"
+  short_description: "Create evidence-grounded change knowledge records"

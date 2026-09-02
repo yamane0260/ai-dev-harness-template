@@ -1,6 +1,6 @@
 # Context Map
 
-Use this file to decide what to read. **Do not load every project document by default.** Start from touched paths/behavior plus the Quality Impact Vector in `ai/quality-envelope.md`.
+Use this file to decide what to read. **Do not load every project document by default.** Start from touched paths/behavior plus the Quality Impact Vector and Knowledge Impact.
 
 | Area / trigger | Read first | Read additionally only if relevant |
 |---|---|---|
@@ -16,12 +16,13 @@ Use this file to decide what to read. **Do not load every project document by de
 | Personal/sensitive data | SECURITY + affected path | data lifecycle/retention policy as applicable |
 | New dependency/tool/action/image | affected manifest/config | SECURITY + supply-chain checks |
 | Deployment/production/observability | RELIABILITY + affected config | ARCHITECTURE; SECURITY for secrets/network boundaries |
-| Harness/policy/CI itself | affected `ai/`, `scripts/ai/`, `.github/` files | risk/quality policy as applicable |
+| MATERIAL/CRITICAL Knowledge Impact | changed diff + verification summary + relevant current docs | `ai/policies/human-legibility.md`; existing related change/decision/concept/runbook only if needed |
+| Harness/policy/CI itself | affected `ai/`, `scripts/ai/`, `.github/` files | risk/quality/human-legibility policy as applicable |
 
 ## Exploration rule
 
-For STANDARD/CRITICAL work, broad repository exploration should be delegated to a read-only explorer/subagent when supported **before** the main implementation context becomes large. The explorer should return `ai/templates/task-packet.md`, not raw search transcripts.
+For STANDARD/CRITICAL work, delegate broad repository exploration to a read-only explorer when supported **before** the main context becomes large. Return `ai/templates/task-packet.md`, not raw transcripts.
 
-Run `spec-gap-preflight` in a small/fresh context when its triggers apply. It should return only relevant domains and missing constraints, not a general quality essay.
+Run `spec-gap-preflight` only when triggered. For Human Legibility, generate records after the implementation is stable from durable evidence; do not import original chat history merely to explain it.
 
-If the task is MICRO and the relevant path is obvious with no material Quality Envelope trigger, skip delegated exploration/preflight.
+If the task is MICRO and the relevant path is obvious with no material Quality/Knowledge trigger, skip delegated exploration/preflight/review.
