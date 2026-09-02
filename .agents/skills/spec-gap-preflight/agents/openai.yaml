@@ -1,0 +1,3 @@
+interface:
+  display_name: "Spec Gap Preflight"
+  short_description: "Find missing quality constraints before implementation"
