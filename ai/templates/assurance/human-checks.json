@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../ai/schemas/human-checks.schema.json",
+  "schema_version": "1.0",
+  "change_id": "CHG-YYYYMMDD-001",
+  "checks": [
+    {
+      "id": "HC-001",
+      "claim_ids": ["CLM-001"],
+      "level": "must",
+      "statement": "Replace with the exact observation or judgment required",
+      "reason": "Explain why deterministic automation cannot establish this property",
+      "procedure": [
+        "Use a named environment/device and perform a bounded action",
+        "Record the observed result without including secrets or personal data"
+      ],
+      "expected": "Replace with the observable pass condition",
+      "status": "pending",
+      "performed_by": null,
+      "performed_at": null,
+      "evidence": null,
+      "not_applicable_reason": null
+    }
+  ]
+}

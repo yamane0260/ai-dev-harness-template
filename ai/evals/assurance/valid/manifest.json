@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../schemas/assurance-manifest.schema.json",
+  "schema_version": "1.0",
+  "change": {
+    "id": "CHG-EVAL-VALID",
+    "title": "Assurance validator fixture",
+    "risk": "yellow",
+    "knowledge_impact": "material",
+    "status": "active"
+  },
+  "requirements": [
+    {
+      "id": "REQ-EVAL-001",
+      "statement": "Malformed assurance relationships are rejected",
+      "source": "ai/evals/assurance/README.md"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-EVAL-001",
+      "statement": "The focused assurance test passes",
+      "criticality": "must",
+      "requirement_ids": ["REQ-EVAL-001"],
+      "scope": {
+        "components": ["assurance-validator"],
+        "paths": ["scripts/ai/validate-assurance"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-EVAL-001",
+          "kind": "gate",
+          "description": "Unit gate executes the assurance readiness tests",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_assurance.py"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "none within the fixture scope"
+    }
+  ],
+  "human_checks_file": "human-checks.json",
+  "references": {
+    "specs": [],
+    "decisions": [],
+    "concepts": [],
+    "runbooks": []
+  },
+  "agent_trace_expectation": {
+    "required": false,
+    "event_types": [],
+    "reason": "Agent trace capture is outside this validator fixture"
+  }
+}

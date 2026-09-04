@@ -1,0 +1,240 @@
+{
+  "$schema": "../../../ai/schemas/assurance-manifest.schema.json",
+  "schema_version": "1.0",
+  "change": {
+    "id": "CHG-20260904-V3",
+    "title": "Responsibility-transfer V3 foundation",
+    "risk": "red",
+    "knowledge_impact": "critical",
+    "status": "released"
+  },
+  "requirements": [
+    {
+      "id": "REQ-V3-001",
+      "statement": "Humans can locate code, knowledge, assurance, pending checks, and audit evidence from one entry point",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    },
+    {
+      "id": "REQ-V3-002",
+      "statement": "Non-trivial changes express Requirement, Claim, Evidence, Human Check, scope, and uncertainty relationships",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    },
+    {
+      "id": "REQ-V3-003",
+      "statement": "Release readiness fails closed for missing, stale, failed, N/A, or human-incomplete MUST support",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    },
+    {
+      "id": "REQ-V3-004",
+      "statement": "Repository relationships can be indexed without making the index a second source of truth",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    },
+    {
+      "id": "REQ-V3-005",
+      "statement": "Explanation adapts by domain without weakening assurance, and agent traces remain sanitized and coverage-aware",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    },
+    {
+      "id": "REQ-V3-006",
+      "statement": "V2 template verification remains compatible while harness maintenance has exact-run RED evidence",
+      "source": "docs/specs/harness-v3-responsibility-transfer.md"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-V3-001",
+      "statement": "All human-facing source-of-truth areas and generated artifact areas are reachable from PROJECT_MAP.md",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-001"],
+      "scope": {
+        "components": ["human-navigation"],
+        "paths": ["PROJECT_MAP.md", "docs/README.md", "assurance/README.md"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-001",
+          "kind": "gate",
+          "description": "Integration self-test requires all entry-point and folder-role files",
+          "required": true,
+          "gate": "integration",
+          "locator": "scripts/ai/self-test"
+        }
+      ],
+      "human_check_ids": ["HC-V3-001"],
+      "residual_uncertainty": "Navigation speed for real maintainers remains a SHOULD human observation"
+    },
+    {
+      "id": "CLM-V3-002",
+      "statement": "Malformed references, asymmetric Human Check links, and unsupported MUST Claims are rejected",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-002", "REQ-V3-003"],
+      "scope": {
+        "components": ["assurance-validator"],
+        "paths": ["scripts/ai/lib/assurance_core.py", "scripts/ai/validate-assurance"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-002",
+          "kind": "gate",
+          "description": "Valid/invalid fixtures and unit tests exercise relationship validation",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_assurance.py"
+        },
+        {
+          "id": "EVR-V3-003",
+          "kind": "ai-review",
+          "description": "Evidence-to-Claim mapping receives an explicit review record",
+          "required": true,
+          "artifact": "assurance/changes/CHG-20260904-V3/reviews/assurance-review.md"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "The validator implements the documented schema subset directly rather than a general JSON Schema engine"
+    },
+    {
+      "id": "CLM-V3-003",
+      "statement": "A required gate is decisive only when it passed on the current commit and working-tree fingerprint",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-003"],
+      "scope": {
+        "components": ["evidence-recorder", "assurance-readiness"],
+        "paths": ["scripts/ai/record-evidence", "scripts/ai/lib/assurance_core.py"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-004",
+          "kind": "gate",
+          "description": "Unit tests cover PASS, N/A, and stale fingerprint behavior",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_assurance.py"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Evidence establishes only the Claims and environments explicitly represented by configured gates"
+    },
+    {
+      "id": "CLM-V3-004",
+      "statement": "AI review alone cannot satisfy a MUST Claim and an incomplete MUST Human Check prevents READY",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-003"],
+      "scope": {
+        "components": ["assurance-readiness"],
+        "paths": ["scripts/ai/lib/assurance_core.py", "ai/policies/assurance.md"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-005",
+          "kind": "gate",
+          "description": "Unit tests exercise AI-review-only and pending MUST Human Check states",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_assurance.py"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "none within the readiness state transitions tested"
+    },
+    {
+      "id": "CLM-V3-005",
+      "statement": "The project relationship index is reproducibly derived from docs and valid assurance records",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-004"],
+      "scope": {
+        "components": ["project-index"],
+        "paths": ["scripts/ai/build-project-index", ".ai-artifacts/index/project-index.json"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-006",
+          "kind": "gate",
+          "description": "Architecture gate rebuilds the index and rejects invalid manifests",
+          "required": true,
+          "gate": "architecture",
+          "locator": "scripts/ai/build-project-index"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Symbol- and line-level relationships remain on-demand derivations rather than committed nodes"
+    },
+    {
+      "id": "CLM-V3-006",
+      "statement": "Agent event utilities reject obvious credential payloads and label coverage as declared-events-only",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-005"],
+      "scope": {
+        "components": ["agent-trace-contract"],
+        "paths": ["scripts/ai/record-agent-event", "scripts/ai/validate-agent-trace", "ai/policies/agent-control.md"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-007",
+          "kind": "gate",
+          "description": "Security tests cover safe metadata and common credential-bearing payloads",
+          "required": true,
+          "gate": "security",
+          "locator": "scripts/ai/tests/test_agent_trace.py"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Automatic completeness depends on future host adapters; the repository contract cannot observe missing host events"
+    },
+    {
+      "id": "CLM-V3-007",
+      "statement": "Domain familiarity changes explanation depth but is prohibited from changing assurance or release rules",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-005"],
+      "scope": {
+        "components": ["adaptive-explanation"],
+        "paths": ["ai/policies/adaptive-explanation.md", ".agents/skills/explain-system/SKILL.md"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-008",
+          "kind": "gate",
+          "description": "Integration self-test requires the policy and Skill that preserve this invariant",
+          "required": true,
+          "gate": "integration",
+          "locator": "scripts/ai/self-test"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Agent adherence remains subject to model/tool instruction-following and should be covered by future evals"
+    },
+    {
+      "id": "CLM-V3-008",
+      "statement": "With the documented Python 3 prerequisite, default template verification succeeds without product gates while --harness uses a separate RED gate configuration",
+      "criticality": "must",
+      "requirement_ids": ["REQ-V3-006"],
+      "scope": {
+        "components": ["verification-cli"],
+        "paths": ["scripts/ai/verify", "ai/commands.conf", "ai/harness-commands.conf"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-V3-009",
+          "kind": "gate",
+          "description": "Integration command runs both harness self-test and default template verification",
+          "required": true,
+          "gate": "integration",
+          "locator": "ai/harness-commands.conf"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Existing adopters with locally modified harness scripts may require a normal merge resolution"
+    }
+  ],
+  "human_checks_file": "human-checks.json",
+  "references": {
+    "specs": ["docs/specs/harness-v3-responsibility-transfer.md"],
+    "decisions": ["docs/decisions/2026-09-04-assurance-as-repository-data.md"],
+    "concepts": ["docs/concepts/assurance-claims.md"],
+    "runbooks": ["docs/runbooks/assurance-readiness.md"]
+  },
+  "agent_trace_expectation": {
+    "required": false,
+    "event_types": ["file.write", "shell.execute", "git.push"],
+    "reason": "This execution host does not expose a repository-controlled guarantee of complete event capture; no trace completeness is claimed"
+  }
+}

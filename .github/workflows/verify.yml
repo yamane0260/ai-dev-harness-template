@@ -34,4 +34,10 @@ jobs:
           echo "Risk floor: $RISK"
 
       - name: Run required gates
-        run: ./scripts/ai/verify --risk "${{ steps.risk.outputs.risk }}"
+        shell: bash
+        run: |
+          if [[ -f ai/TEMPLATE_MODE ]]; then
+            ./scripts/ai/verify --harness --risk "${{ steps.risk.outputs.risk }}"
+          else
+            ./scripts/ai/verify --risk "${{ steps.risk.outputs.risk }}"
+          fi

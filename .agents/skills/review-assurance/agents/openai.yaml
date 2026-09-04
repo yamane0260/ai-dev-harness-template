@@ -1,0 +1,3 @@
+interface:
+  display_name: "Review Assurance"
+  short_description: "Check Claim, evidence, and Human Check mappings"

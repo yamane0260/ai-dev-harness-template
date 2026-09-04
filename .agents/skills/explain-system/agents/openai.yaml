@@ -1,0 +1,3 @@
+interface:
+  display_name: "Explain System"
+  short_description: "Explain project relationships at the reader's level"

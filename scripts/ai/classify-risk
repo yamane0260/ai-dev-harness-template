@@ -34,8 +34,12 @@ if [[ -z "$base" ]]; then
 fi
 
 if [[ -n "$base" ]]; then
-  files="$(git diff --name-only "$base"...HEAD 2>/dev/null || git diff --name-only "$base" HEAD 2>/dev/null || true)"
-  diff="$(git diff --unified=0 "$base"...HEAD 2>/dev/null || git diff --unified=0 "$base" HEAD 2>/dev/null || true)"
+  committed_files="$(git diff --name-only "$base"...HEAD 2>/dev/null || git diff --name-only "$base" HEAD 2>/dev/null || true)"
+  working_files="$(git status --porcelain | sed -E 's/^.. //')"
+  files="${committed_files}"$'\n'"${working_files}"
+  committed_diff="$(git diff --unified=0 "$base"...HEAD 2>/dev/null || git diff --unified=0 "$base" HEAD 2>/dev/null || true)"
+  working_diff="$(git diff --unified=0 -- .; git diff --cached --unified=0 -- .)"
+  diff="${committed_diff}"$'\n'"${working_diff}"
 else
   files="$(git status --porcelain | sed -E 's/^.. //')"
   diff="$(git diff --unified=0 -- .; git diff --cached --unified=0 -- .)"
@@ -45,8 +49,8 @@ haystack="${files}"$'\n'"${diff}"
 level="green"
 reasons=()
 
-red_pattern='(^|/)(auth|authentication|authorization|permissions?|roles?|migrations?|security|payments?|billing|infra|terraform|k8s|kubernetes|production|prod)(/|\.|$)|\.github/workflows/|ai/policies/(risk-policy|quality-gates)\.md|scripts/ai/(verify|classify-risk)|secrets?|personal[_ -]?data|tenant[_ -]?isolation'
-yellow_pattern='(^|/)(api|routes?|controllers?|components?|pages?|ui|frontend|backend|data|integrations?)(/|\.|$)|package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|pyproject\.toml|poetry\.lock|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|docs/DESIGN\.md|schema|contract|dependency'
+red_pattern='(^|/)(auth|authentication|authorization|permissions?|roles?|migrations?|security|payments?|billing|infra|terraform|k8s|kubernetes|production|prod)(/|\.|$)|\.github/workflows/|ai/policies/(risk-policy|quality-gates|assurance|agent-control)\.md|scripts/ai/(verify|classify-risk|validate-assurance|record-evidence)|secrets?|personal[_ -]?data|tenant[_ -]?isolation'
+yellow_pattern='(^|/)(api|routes?|controllers?|components?|pages?|ui|frontend|backend|data|integrations?|assurance)(/|\.|$)|package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|pyproject\.toml|poetry\.lock|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|docs/DESIGN\.md|schema|contract|dependency'
 destructive_pattern='(^|[^A-Z])(DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE|DELETE[[:space:]]+FROM|destroy|purge|hard[ -]?delete)'
 
 if printf '%s\n' "$haystack" | grep -Eiq "$red_pattern"; then

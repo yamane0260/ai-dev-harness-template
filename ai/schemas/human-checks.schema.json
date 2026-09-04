@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/human-checks.schema.json",
+  "title": "AI Dev Harness human checks",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "change_id", "checks"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schema_version": { "const": "1.0" },
+    "change_id": { "type": "string", "pattern": "^CHG-[A-Za-z0-9][A-Za-z0-9._-]*$" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "claim_ids",
+          "level",
+          "statement",
+          "reason",
+          "procedure",
+          "expected",
+          "status",
+          "performed_by",
+          "performed_at",
+          "evidence"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^HC-[A-Za-z0-9][A-Za-z0-9._-]*$" },
+          "claim_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string" }
+          },
+          "level": { "enum": ["must", "should", "optional"] },
+          "statement": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "procedure": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "expected": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pending", "passed", "failed", "not_applicable"] },
+          "performed_by": { "type": ["string", "null"] },
+          "performed_at": { "type": ["string", "null"], "format": "date-time" },
+          "evidence": { "type": ["string", "null"] },
+          "not_applicable_reason": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

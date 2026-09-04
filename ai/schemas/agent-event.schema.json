@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/agent-event.schema.json",
+  "title": "AI Dev Harness sanitized agent event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "timestamp",
+    "trace_id",
+    "span_id",
+    "parent_span_id",
+    "actor",
+    "action_type",
+    "target",
+    "outcome",
+    "impact",
+    "authorization_source",
+    "capture_source",
+    "redaction"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "trace_id": { "type": "string", "minLength": 8 },
+    "span_id": { "type": "string", "minLength": 8 },
+    "parent_span_id": { "type": ["string", "null"] },
+    "actor": { "type": "string", "minLength": 1 },
+    "action_type": {
+      "enum": [
+        "file.read",
+        "file.write",
+        "shell.execute",
+        "network.request",
+        "tool.call",
+        "credential.access",
+        "git.push",
+        "release.deploy",
+        "subagent.invoke"
+      ]
+    },
+    "target": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "outcome": { "enum": ["success", "failure", "denied", "unknown"] },
+    "impact": { "enum": ["routine", "sensitive", "external"] },
+    "authorization_source": {
+      "enum": ["user-request", "repository-policy", "tool-policy", "human-approval", "unknown"]
+    },
+    "capture_source": { "enum": ["host", "tool-adapter", "wrapper", "manual"] },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_recorded", "secrets_recorded"],
+      "properties": {
+        "payload_recorded": { "const": false },
+        "secrets_recorded": { "const": false }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "impact": { "const": "external" } } },
+      "then": {
+        "properties": {
+          "authorization_source": { "not": { "const": "unknown" } }
+        }
+      }
+    }
+  ]
+}

@@ -6,7 +6,9 @@ cd "$ROOT"
 
 required=(
   "AGENTS.md"
+  ".agents/skills/README.md"
   "docs/PRODUCT.md"
+  "docs/README.md"
   "docs/ARCHITECTURE.md"
   "docs/SECURITY.md"
   "docs/DESIGN.md"
@@ -16,12 +18,21 @@ required=(
   "docs/decisions/README.md"
   "docs/concepts/README.md"
   "docs/runbooks/README.md"
+  "PROJECT_MAP.md"
+  "assurance/README.md"
+  "assurance/current/README.md"
+  "assurance/changes/README.md"
   "ai/context-map.md"
+  "ai/README.md"
   "ai/quality-envelope.md"
   "ai/policies/risk-policy.md"
   "ai/policies/quality-gates.md"
   "ai/policies/human-legibility.md"
+  "ai/policies/assurance.md"
+  "ai/policies/adaptive-explanation.md"
+  "ai/policies/agent-control.md"
   "ai/commands.conf"
+  "ai/harness-commands.conf"
   "ai/templates/task-packet.md"
   "ai/templates/quality-impact.md"
   "ai/templates/ux-contract.md"
@@ -29,11 +40,25 @@ required=(
   "ai/templates/change-brief.md"
   "ai/templates/runbook.md"
   "ai/templates/approval-packet.md"
+  "ai/templates/assurance/manifest.json"
+  "ai/templates/assurance/human-checks.json"
+  "ai/schemas/assurance-manifest.schema.json"
+  "ai/schemas/human-checks.schema.json"
+  "ai/schemas/evidence-record.schema.json"
+  "ai/schemas/agent-event.schema.json"
+  "ai/schemas/project-index.schema.json"
   "ai/evals/quality-envelope/README.md"
   "ai/evals/human-legibility/README.md"
+  "ai/evals/assurance/README.md"
   "scripts/ai/classify-risk"
+  "scripts/ai/README.md"
   "scripts/ai/verify"
   "scripts/ai/validate-approval"
+  "scripts/ai/validate-assurance"
+  "scripts/ai/record-evidence"
+  "scripts/ai/build-project-index"
+  "scripts/ai/record-agent-event"
+  "scripts/ai/validate-agent-trace"
 )
 
 fail=0
@@ -47,7 +72,8 @@ done
 skills=(
   bootstrap-project develop-feature verify-work debug-systematically
   spec-gap-preflight review-code review-security review-ux review-design
-  explain-change review-legibility prepare-approval release-change
+  explain-change explain-system review-assurance review-legibility
+  prepare-approval release-change
 )
 for skill in "${skills[@]}"; do
   file=".agents/skills/$skill/SKILL.md"
@@ -72,6 +98,95 @@ for script in scripts/ai/self-test scripts/ai/classify-risk scripts/ai/verify sc
     fail=1
   fi
 done
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "FAIL python3 is required for standard-library assurance tools"
+  fail=1
+else
+  python_files=(
+    scripts/ai/lib/__init__.py
+    scripts/ai/lib/assurance_core.py
+    scripts/ai/lib/agent_trace.py
+    scripts/ai/validate-assurance
+    scripts/ai/record-evidence
+    scripts/ai/build-project-index
+    scripts/ai/record-agent-event
+    scripts/ai/validate-agent-trace
+    scripts/ai/tests/test_assurance.py
+    scripts/ai/tests/test_agent_trace.py
+    scripts/ai/tests/test_project_index.py
+  )
+  if ! python3 -m py_compile "${python_files[@]}"; then
+    echo "FAIL Python syntax/compile check"
+    fail=1
+  fi
+
+  json_files=(
+    ai/schemas/assurance-manifest.schema.json
+    ai/schemas/human-checks.schema.json
+    ai/schemas/evidence-record.schema.json
+    ai/schemas/agent-event.schema.json
+    ai/schemas/project-index.schema.json
+    ai/templates/assurance/manifest.json
+    ai/templates/assurance/human-checks.json
+  )
+  for json_file in "${json_files[@]}"; do
+    if ! python3 -m json.tool "$json_file" >/dev/null; then
+      echo "FAIL invalid JSON: $json_file"
+      fail=1
+    fi
+  done
+
+  if ! ./scripts/ai/validate-assurance \
+    --manifest ai/evals/assurance/valid/manifest.json >/dev/null; then
+    echo "FAIL valid assurance fixture was rejected"
+    fail=1
+  fi
+  shopt -s nullglob
+  for active_manifest in assurance/current/*/manifest.json; do
+    if ! ./scripts/ai/validate-assurance --manifest "$active_manifest" >/dev/null; then
+      echo "FAIL invalid active assurance manifest: $active_manifest"
+      fail=1
+    fi
+  done
+  shopt -u nullglob
+  if ./scripts/ai/validate-assurance \
+    --manifest ai/evals/assurance/invalid/manifest.json >/dev/null 2>&1; then
+    echo "FAIL invalid assurance fixture was accepted"
+    fail=1
+  fi
+  if ! python3 -m unittest discover -s scripts/ai/tests -p 'test_*.py'; then
+    echo "FAIL assurance readiness unit tests"
+    fail=1
+  fi
+
+  temp_dir="$(mktemp -d)"
+  trap 'rm -rf "$temp_dir"' EXIT
+  if ! ./scripts/ai/build-project-index \
+    --manifest ai/evals/assurance/valid/manifest.json \
+    --output "$temp_dir/project-index.json" >/dev/null; then
+    echo "FAIL project index build"
+    fail=1
+  fi
+  if ! ./scripts/ai/record-agent-event \
+    --actor self-test \
+    --action shell.execute \
+    --target scripts/ai/self-test \
+    --outcome success \
+    --authorization repository-policy \
+    --capture-source wrapper \
+    --trace-id self-test-trace \
+    --span-id self-test-span \
+    --output "$temp_dir/agent-events.jsonl" >/dev/null; then
+    echo "FAIL agent event recording"
+    fail=1
+  elif ! ./scripts/ai/validate-agent-trace \
+    "$temp_dir/agent-events.jsonl" \
+    --summary "$temp_dir/agent-summary.json" >/dev/null; then
+    echo "FAIL agent trace validation"
+    fail=1
+  fi
+fi
 
 if [[ -f ai/TEMPLATE_MODE ]]; then
   markers=(package.json pyproject.toml Cargo.toml go.mod pom.xml build.gradle build.gradle.kts)

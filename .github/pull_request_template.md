@@ -24,6 +24,15 @@
 
 <!-- Latest ./scripts/ai/verify summary or CI. -->
 
+## Assurance (non-trivial work)
+
+- Manifest: <!-- assurance/current/<change-id>/manifest.json or N/A for MICRO/GREEN/LOW -->
+- Readiness: <!-- READY / ACTION_REQUIRED / BLOCKED / N/A -->
+- MACHINE_VERIFIED Claims:
+- AI_REVIEWED Claims: <!-- never describe these as machine proof -->
+- HUMAN_REQUIRED / HUMAN_VERIFIED:
+- UNVERIFIED scope / residual uncertainty:
+
 ## Targeted independent review
 
 - [ ] Not required

@@ -6,6 +6,10 @@ cd "$ROOT"
 
 risk="auto"
 base=""
+assurance_manifest=""
+release_mode="false"
+harness_mode="false"
+agent_trace_summary=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --risk)
@@ -14,6 +18,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --base)
       base="${2:-}"
+      shift 2
+      ;;
+    --assurance)
+      assurance_manifest="${2:-}"
+      shift 2
+      ;;
+    --release)
+      release_mode="true"
+      shift
+      ;;
+    --harness)
+      harness_mode="true"
+      shift
+      ;;
+    --agent-trace-summary)
+      agent_trace_summary="${2:-}"
       shift 2
       ;;
     *)
@@ -27,14 +47,31 @@ done
 
 git diff --check
 
-if [[ -f ai/TEMPLATE_MODE ]]; then
+if [[ -f ai/TEMPLATE_MODE && "$harness_mode" != "true" ]]; then
+  if [[ -n "$assurance_manifest" ]]; then
+    ./scripts/ai/validate-assurance --manifest "$assurance_manifest"
+  fi
+  if [[ "$release_mode" == "true" ]]; then
+    echo "FAIL template mode cannot produce release readiness" >&2
+    echo "Run bootstrap-project, configure project gates, and remove ai/TEMPLATE_MODE first." >&2
+    exit 2
+  fi
   echo "PASS template-mode harness verification (product gates are intentionally inactive)"
   echo "Run bootstrap-project, configure ai/commands.conf, then remove ai/TEMPLATE_MODE in a real project."
   exit 0
 fi
 
-# shellcheck disable=SC1091
-source ai/commands.conf
+if [[ "$harness_mode" == "true" ]]; then
+  if [[ ! -f ai/TEMPLATE_MODE ]]; then
+    echo "FAIL --harness is only for maintaining the template repository itself" >&2
+    exit 2
+  fi
+  # shellcheck disable=SC1091
+  source ai/harness-commands.conf
+else
+  # shellcheck disable=SC1091
+  source ai/commands.conf
+fi
 
 if [[ "${PROJECT_READY:-false}" != "true" ]]; then
   echo "FAIL ai/commands.conf has PROJECT_READY != true" >&2
@@ -57,10 +94,34 @@ case "$risk" in
   *) echo "FAIL invalid risk level: $risk" >&2; exit 2 ;;
 esac
 
-stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+if [[ "$release_mode" == "true" && "$risk" != "green" && -z "$assurance_manifest" ]]; then
+  echo "FAIL --release for YELLOW/RED work requires --assurance <manifest.json>" >&2
+  exit 2
+fi
+
+stamp="$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM"
 outdir=".ai-artifacts/verification/$stamp"
 mkdir -p "$outdir"
 summary="$outdir/summary.md"
+records="$outdir/gates.tsv"
+: > "$records"
+
+encode_base64() {
+  printf '%s' "$1" | base64 | tr -d '\r\n'
+}
+
+record_gate() {
+  local gate="$1"
+  local result="$2"
+  local exit_code="$3"
+  local command="$4"
+  local detail="$5"
+  local log_path="$6"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$gate" "$result" "$exit_code" \
+    "$(encode_base64 "$command")" "$(encode_base64 "$detail")" "$log_path" \
+    >> "$records"
+}
 {
   echo "# Verification Summary"
   echo
@@ -90,20 +151,64 @@ for gate in "${gates[@]}"; do
     if [[ $status -eq 0 ]]; then
       echo "PASS $gate"
       printf '| %s | PASS | `%s` |\n' "$gate" "$cmd" >> "$summary"
+      record_gate "$gate" "PASS" "$status" "$cmd" "" "$log"
     else
       echo "FAIL $gate (exit $status); see $log" >&2
       printf '| %s | FAIL | exit %s; `%s` |\n' "$gate" "$status" "$cmd" >> "$summary"
+      record_gate "$gate" "FAIL" "$status" "$cmd" "exit $status" "$log"
       fail=1
     fi
   elif [[ -n "$na_reason" ]]; then
     echo "N/A $gate: $na_reason"
     printf '| %s | N/A | %s |\n' "$gate" "$na_reason" >> "$summary"
+    record_gate "$gate" "N/A" "" "" "$na_reason" ""
   else
     echo "FAIL $gate is required for $risk but has neither a command nor an N/A reason" >&2
     printf '| %s | UNCONFIGURED | required for %s |\n' "$gate" "$risk" >> "$summary"
+    record_gate "$gate" "UNCONFIGURED" "" "" "required for $risk" ""
     fail=1
   fi
 done
+
+evidence="$outdir/evidence.json"
+./scripts/ai/record-evidence \
+  --risk "$risk" \
+  --run-id "$stamp" \
+  --records "$records" \
+  --output "$evidence" \
+  --shell "${SHELL:-unknown}" \
+  >/dev/null
+
+{
+  echo
+  echo "- Machine-readable evidence: \`$evidence\`"
+} >> "$summary"
+
+if [[ -n "$assurance_manifest" ]]; then
+  readiness="$outdir/readiness.json"
+  assurance_args=(
+    --manifest "$assurance_manifest"
+    --evidence "$evidence"
+    --output "$readiness"
+  )
+  if [[ "$release_mode" == "true" ]]; then
+    assurance_args+=(--release)
+  fi
+  if [[ -n "$agent_trace_summary" ]]; then
+    assurance_args+=(--agent-trace-summary "$agent_trace_summary")
+  fi
+  set +e
+  ./scripts/ai/validate-assurance "${assurance_args[@]}"
+  assurance_status=$?
+  set -e
+  {
+    echo "- Assurance manifest: \`$assurance_manifest\`"
+    echo "- Assurance readiness: \`$readiness\`"
+  } >> "$summary"
+  if [[ $assurance_status -ne 0 ]]; then
+    fail=1
+  fi
+fi
 
 echo
 echo "Verification summary: $summary"

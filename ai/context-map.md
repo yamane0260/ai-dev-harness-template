@@ -17,6 +17,9 @@ Use this file to decide what to read. **Do not load every project document by de
 | New dependency/tool/action/image | affected manifest/config | SECURITY + supply-chain checks |
 | Deployment/production/observability | RELIABILITY + affected config | ARCHITECTURE; SECURITY for secrets/network boundaries |
 | MATERIAL/CRITICAL Knowledge Impact | changed diff + verification summary + relevant current docs | `ai/policies/human-legibility.md`; existing related change/decision/concept/runbook only if needed |
+| Non-trivial completion/release | active assurance manifest + generated evidence summary | `ai/policies/assurance.md`; raw gate log only for a targeted failure |
+| Explain system/change to a specific person | relevant nodes from derived project index + source files | `.harness-user.json` locally; `ai/policies/adaptive-explanation.md` |
+| Agent action/control investigation | trace coverage summary + relevant events | `ai/policies/agent-control.md`; never load all raw events by default |
 | Harness/policy/CI itself | affected `ai/`, `scripts/ai/`, `.github/` files | risk/quality/human-legibility policy as applicable |
 
 ## Exploration rule
@@ -24,5 +27,7 @@ Use this file to decide what to read. **Do not load every project document by de
 For STANDARD/CRITICAL work, delegate broad repository exploration to a read-only explorer when supported **before** the main context becomes large. Return `ai/templates/task-packet.md`, not raw transcripts.
 
 Run `spec-gap-preflight` only when triggered. For Human Legibility, generate records after the implementation is stable from durable evidence; do not import original chat history merely to explain it.
+
+Use `PROJECT_MAP.md` when the question is human-oriented ("where is…?", "why is this trusted?", "what must I check?"). Use `./scripts/ai/build-project-index` for relationship retrieval. The generated index is a read model, not a new source of truth.
 
 If the task is MICRO and the relevant path is obvious with no material Quality/Knowledge trigger, skip delegated exploration/preflight/review.

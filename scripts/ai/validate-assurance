@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Validate an assurance manifest and optionally calculate exact-run readiness."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lib.assurance_core import dump_json, evaluate_readiness, load_json, validate_assurance
+
+
+def render_text(result: dict) -> str:
+    lines = []
+    if "readiness" not in result:
+        state = "VALID" if result.get("valid") else "INVALID"
+        lines.append(f"Assurance structure: {state}")
+    else:
+        lines.append(f"Assurance readiness: {result['readiness']}")
+        lines.append(f"Revision current: {'yes' if result['revision_current'] else 'no'}")
+        lines.append(f"Agent trace: {result.get('agent_trace', 'N/A')}")
+        for claim in result.get("claims", []):
+            lines.append(
+                f"- {claim['id']}: machine={claim['machine']} "
+                f"ai_review={claim['ai_review']} human={claim['human']}"
+            )
+    for issue in result.get("errors", []) + result.get("blockers", []):
+        location = f" [{issue['location']}]" if issue.get("location") else ""
+        lines.append(f"ERROR {issue['code']}{location}: {issue['message']}")
+    for issue in result.get("human_actions", []):
+        location = f" [{issue['location']}]" if issue.get("location") else ""
+        lines.append(f"ACTION {issue['code']}{location}: {issue['message']}")
+    for issue in result.get("warnings", []):
+        location = f" [{issue['location']}]" if issue.get("location") else ""
+        lines.append(f"WARN {issue['code']}{location}: {issue['message']}")
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manifest", required=True, type=Path)
+    parser.add_argument("--evidence", type=Path)
+    parser.add_argument("--agent-trace-summary", type=Path)
+    parser.add_argument("--release", action="store_true")
+    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--skip-revision-check",
+        action="store_true",
+        help="Only for deterministic fixtures; never use for real release evidence.",
+    )
+    args = parser.parse_args()
+
+    if args.release and args.skip_revision_check:
+        parser.error("--skip-revision-check cannot be used with --release")
+
+    try:
+        validation = validate_assurance(args.manifest)
+    except (OSError, ValueError) as exc:
+        validation = {
+            "valid": False,
+            "manifest": str(args.manifest),
+            "errors": [{"code": "MANIFEST", "message": str(exc)}],
+            "warnings": [],
+        }
+    if args.evidence and validation.get("valid"):
+        try:
+            evidence = load_json(args.evidence.resolve())
+        except (OSError, json.JSONDecodeError) as exc:
+            result = {
+                "readiness": "BLOCKED",
+                "revision_current": False,
+                "claims": [],
+                "blockers": [{"code": "EVIDENCE_JSON", "message": str(exc)}],
+                "human_actions": [],
+                "warnings": validation.get("warnings", []),
+            }
+        else:
+            trace_summary = None
+            if args.agent_trace_summary:
+                try:
+                    trace_summary = load_json(args.agent_trace_summary.resolve())
+                except (OSError, json.JSONDecodeError) as exc:
+                    trace_summary = {"errors": [str(exc)]}
+            result = evaluate_readiness(
+                validation,
+                evidence,
+                check_revision=not args.skip_revision_check,
+                trace_summary=trace_summary,
+            )
+    elif args.evidence:
+        result = {
+            "readiness": "BLOCKED",
+            "revision_current": False,
+            "claims": [],
+            "blockers": validation.get("errors", []),
+            "human_actions": [],
+            "warnings": validation.get("warnings", []),
+        }
+    else:
+        result = {
+            key: value
+            for key, value in validation.items()
+            if key not in {"data", "human_checks", "root"}
+        }
+
+    if args.output:
+        dump_json(result, args.output)
+    sys.stdout.write(dump_json(result) if args.format == "json" else render_text(result))
+
+    if not validation.get("valid"):
+        return 1
+    if args.release and result.get("readiness") != "READY":
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

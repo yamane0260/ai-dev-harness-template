@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../ai/schemas/human-checks.schema.json",
+  "schema_version": "1.0",
+  "change_id": "CHG-20260904-V3",
+  "checks": [
+    {
+      "id": "HC-V3-001",
+      "claim_ids": ["CLM-V3-001"],
+      "level": "should",
+      "statement": "A maintainer can find assurance status, remaining human work, and recovery guidance from PROJECT_MAP.md without browsing every folder",
+      "reason": "File existence and link targets are machine-checkable, but human findability and wording clarity need a representative reader",
+      "procedure": [
+        "Open only PROJECT_MAP.md at the repository root",
+        "Locate where Claim readiness and Human Checks are stored",
+        "Locate the runbook for a BLOCKED assurance result",
+        "Record whether all three destinations were found within two minutes"
+      ],
+      "expected": "All three destinations are correctly identified within two minutes without opening the original AI conversation",
+      "status": "pending",
+      "performed_by": null,
+      "performed_at": null,
+      "evidence": null,
+      "not_applicable_reason": null
+    }
+  ]
+}

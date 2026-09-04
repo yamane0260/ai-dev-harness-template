@@ -9,6 +9,10 @@ One sentence describing the requested outcome.
 - Positive behavior: ...
 - Negative/invariant criteria only where material: ...
 
+## Assurance Claims (STANDARD/CRITICAL or YELLOW/RED)
+- Requirement -> observable Claim IDs; omit only when the change is genuinely MICRO/GREEN/LOW.
+- Decisive machine gate or Human Check expected for each MUST Claim.
+
 ## Relevant files
 - `path`: why it matters
 

@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Convert verifier gate records into exact-revision JSON evidence."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import platform
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lib.assurance_core import dump_json, find_repo_root, repository_revision, sha256_file
+
+
+def decode(value: str) -> str:
+    if not value:
+        return ""
+    return base64.b64decode(value.encode("ascii"), validate=True).decode("utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--risk", choices=("green", "yellow", "red"), required=True)
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--records", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--shell", default="unknown")
+    args = parser.parse_args()
+
+    root = find_repo_root(Path.cwd())
+    gates = []
+    with args.records.open("r", encoding="utf-8") as handle:
+        for line_number, raw_line in enumerate(handle, start=1):
+            line = raw_line.rstrip("\n")
+            if not line:
+                continue
+            fields = line.split("\t")
+            if len(fields) != 6:
+                raise ValueError(
+                    f"{args.records}:{line_number}: expected 6 tab-separated fields"
+                )
+            gate, result, exit_code_raw, command_b64, detail_b64, log_raw = fields
+            command = decode(command_b64) or None
+            detail = decode(detail_b64) or None
+            log = None
+            if log_raw:
+                log_path = (root / log_raw).resolve()
+                try:
+                    normalized_log = log_path.relative_to(root).as_posix()
+                except ValueError as exc:
+                    raise ValueError(f"log path escapes repository: {log_raw}") from exc
+                if log_path.is_file():
+                    log = {"path": normalized_log, "sha256": sha256_file(log_path)}
+            gates.append(
+                {
+                    "gate": gate,
+                    "result": result,
+                    "command": command,
+                    "exit_code": int(exit_code_raw) if exit_code_raw else None,
+                    "detail": detail,
+                    "log": log,
+                }
+            )
+
+    evidence = {
+        "schema_version": "1.0",
+        "run": {
+            "id": args.run_id,
+            "risk": args.risk,
+            "recorded_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        },
+        "revision": repository_revision(root),
+        "environment": {
+            "os": platform.platform(),
+            "architecture": platform.machine(),
+            "python": platform.python_version(),
+            "shell": args.shell,
+        },
+        "gates": gates,
+    }
+    dump_json(evidence, args.output)
+    print(args.output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

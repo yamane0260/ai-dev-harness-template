@@ -1,4 +1,5 @@
 .ai-artifacts/
+.harness-user.json
 .env
 .env.*
 !.env.example

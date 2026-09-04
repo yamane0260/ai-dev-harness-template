@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "change": {
+    "id": "CHG-EVAL-INVALID",
+    "title": "Invalid assurance validator fixture",
+    "risk": "yellow",
+    "knowledge_impact": "material",
+    "status": "active"
+  },
+  "requirements": [
+    {
+      "id": "REQ-EVAL-001",
+      "statement": "An invalid fixture must fail",
+      "source": "ai/evals/assurance/README.md"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-EVAL-BROKEN",
+      "statement": "This MUST Claim intentionally has no support",
+      "criticality": "must",
+      "requirement_ids": ["REQ-DOES-NOT-EXIST"],
+      "scope": {
+        "components": [],
+        "paths": []
+      },
+      "evidence_requirements": [],
+      "human_check_ids": [],
+      "residual_uncertainty": "intentionally invalid"
+    }
+  ],
+  "human_checks_file": "human-checks.json",
+  "references": {
+    "specs": [],
+    "decisions": [],
+    "concepts": [],
+    "runbooks": []
+  }
+}

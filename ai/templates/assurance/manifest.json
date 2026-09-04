@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../ai/schemas/assurance-manifest.schema.json",
+  "schema_version": "1.0",
+  "change": {
+    "id": "CHG-YYYYMMDD-001",
+    "title": "Replace with a concise change title",
+    "risk": "yellow",
+    "knowledge_impact": "material",
+    "status": "draft"
+  },
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "statement": "Replace with an observable requested outcome",
+      "source": "docs/specs/replace-with-source.md"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-001",
+      "statement": "Replace with a property that can be supported by evidence",
+      "criticality": "must",
+      "requirement_ids": ["REQ-001"],
+      "scope": {
+        "components": ["replace-with-component"],
+        "paths": ["replace/with/affected/path"]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-001",
+          "kind": "gate",
+          "description": "Replace with the behavior proved by this gate",
+          "required": true,
+          "gate": "unit",
+          "locator": "replace/with/focused/test"
+        }
+      ],
+      "human_check_ids": ["HC-001"],
+      "residual_uncertainty": "Replace with none or a bounded known uncertainty"
+    }
+  ],
+  "human_checks_file": "human-checks.json",
+  "references": {
+    "specs": ["docs/specs/replace-with-source.md"],
+    "decisions": [],
+    "concepts": [],
+    "runbooks": []
+  },
+  "agent_trace_expectation": {
+    "required": false,
+    "event_types": [],
+    "reason": "Set a concrete trace expectation only when the execution host can supply it"
+  }
+}

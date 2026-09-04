@@ -30,6 +30,8 @@ Typical examples: authentication/authorization, security controls, destructive/i
 
 Expected handling: required RED gates pass; relevant independent specialist review; rollback/recovery evidence; No-Guess Approval before irreversible action/release; explicit human go/no-go for the consequence.
 
+For YELLOW/RED release mode, use an assurance manifest. The final risk must be at least the deterministic floor and at least the manifest risk; evidence from a lower risk gate set is not sufficient. `READY` is scoped to declared Claims and does not lower the risk classification.
+
 ## Expertise Gate
 
 Do not ask a non-expert to certify a technical claim they cannot reasonably evaluate. Identify missing expertise, seek independent evidence/expert review where available, otherwise choose a safer standard/reversible design or postpone the risky action.

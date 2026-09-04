@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "domains": {
+    "project-domain": 2,
+    "javascript": 0,
+    "react": 0,
+    "postgresql": 0,
+    "oauth": 0,
+    "aws": 0
+  },
+  "preferred_detail": "adaptive"
+}

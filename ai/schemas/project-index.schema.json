@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/project-index.schema.json",
+  "title": "AI Dev Harness derived project index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "source_fingerprint",
+    "source_files",
+    "nodes",
+    "edges",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "source_fingerprint": { "type": "string" },
+    "source_files": { "type": "array", "items": { "type": "string" } },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "label"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "relation", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "relation": { "type": "string" },
+          "to": { "type": "string" }
+        }
+      }
+    },
+    "warnings": { "type": "array" }
+  }
+}

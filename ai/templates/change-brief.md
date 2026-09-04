@@ -20,7 +20,9 @@ What a future maintainer needs to understand now that was not previously necessa
 - What must remain true when this area is changed later.
 
 ## Verification
-- Check/result/evidence path.
+- Claim -> machine evidence / AI review / Human Check mapping.
+- Exact-run evidence and readiness paths.
+- Residual uncertainty or unverified scope.
 
 ## Maintenance notes
 - Likely next modification and where to start.

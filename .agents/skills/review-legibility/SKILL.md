@@ -9,6 +9,8 @@ Run this review in a fresh context when supported. Do not read the original impl
 
 Inputs should normally be limited to the Change Brief, relevant current docs/decisions/runbooks, changed diff, focused tests, and verification summary.
 
+Use `PROJECT_MAP.md` and the derived project index when available. Test at least the relevant domain familiarity, not a generic junior/senior label. Explanation depth may vary; facts, uncertainty, and release requirements must not.
+
 Ask the **AI Absence Test**:
 
 1. What changed, in project terms?
@@ -16,6 +18,7 @@ Ask the **AI Absence Test**:
 3. What invariants, failure modes, or boundaries must a future maintainer preserve?
 4. Where should a maintainer look and what should they change for the most likely next modification?
 5. If it fails in production, how can a maintainer detect, diagnose, and recover from it?
+6. Can the maintainer distinguish machine proof, AI review, required/completed human checks, and unverified scope?
 
 Pass only when a fresh maintainer can answer the questions from durable repository evidence without relying on the original agent session.
 

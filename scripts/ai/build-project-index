@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""Build a derived relationship index from repository sources of truth."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from lib.assurance_core import dump_json, find_repo_root, validate_assurance
+
+
+def document_type(relative: str) -> str:
+    if relative.startswith("docs/specs/"):
+        return "spec"
+    if relative.startswith("docs/changes/"):
+        return "change-brief"
+    if relative.startswith("docs/decisions/"):
+        return "decision"
+    if relative.startswith("docs/concepts/"):
+        return "concept"
+    if relative.startswith("docs/runbooks/"):
+        return "runbook"
+    if relative.startswith("docs/"):
+        return "current-doc"
+    if relative.startswith("assurance/"):
+        return "assurance-guide"
+    if relative.startswith("ai/policies/"):
+        return "policy"
+    if relative.startswith(".agents/skills/"):
+        return "workflow-skill"
+    return "entry-doc"
+
+
+def first_heading(path: Path) -> str:
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                if line.startswith("# "):
+                    return line[2:].strip()
+    except OSError:
+        pass
+    return path.stem
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manifest", action="append", type=Path, default=[])
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+
+    root = find_repo_root(Path.cwd())
+    output = args.output or root / ".ai-artifacts" / "index" / "project-index.json"
+    if not output.is_absolute():
+        output = root / output
+
+    nodes: dict[str, dict] = {}
+    edges: set[tuple[str, str, str]] = set()
+    source_paths: set[Path] = set()
+    warnings = []
+
+    def add_node(node_id: str, node_type: str, label: str, **extra: object) -> None:
+        node = {"id": node_id, "type": node_type, "label": label}
+        node.update({key: value for key, value in extra.items() if value not in (None, [], "")})
+        nodes[node_id] = node
+
+    def add_edge(source: str, relation: str, target: str) -> None:
+        edges.add((source, relation, target))
+
+    docs = [root / "README.md", root / "PROJECT_MAP.md", root / "AGENTS.md"]
+    docs.extend(sorted((root / "docs").rglob("*.md")))
+    docs.extend(sorted((root / "assurance").rglob("*.md")))
+    docs.extend(sorted((root / "ai" / "policies").glob("*.md")))
+    docs.extend(sorted((root / ".agents" / "skills").glob("*/SKILL.md")))
+    for path in docs:
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root).as_posix()
+        source_paths.add(path)
+        add_node(f"FILE:{relative}", document_type(relative), first_heading(path), path=relative)
+
+    manifest_paths = [path.resolve() for path in args.manifest]
+    if not manifest_paths:
+        manifest_paths.extend(sorted((root / "assurance" / "current").glob("*/manifest.json")))
+        manifest_paths.extend(sorted((root / "assurance" / "changes").glob("*/manifest.json")))
+
+    invalid = False
+    for manifest_path in manifest_paths:
+        validation = validate_assurance(manifest_path)
+        if not validation.get("valid"):
+            invalid = True
+            warnings.append(
+                {
+                    "manifest": str(manifest_path),
+                    "errors": validation.get("errors", []),
+                }
+            )
+            continue
+        data = validation["data"]
+        human_checks = validation["human_checks"].get("checks", [])
+        source_paths.add(manifest_path)
+        human_path = manifest_path.parent / data["human_checks_file"]
+        if human_path.is_file():
+            source_paths.add(human_path)
+
+        change = data["change"]
+        change_node = f"CHANGE:{change['id']}"
+        add_node(
+            change_node,
+            "change",
+            change["title"],
+            change_id=change["id"],
+            risk=change["risk"],
+            knowledge_impact=change["knowledge_impact"],
+            status=change["status"],
+            manifest=manifest_path.relative_to(root).as_posix(),
+        )
+
+        for requirement in data["requirements"]:
+            node_id = f"REQUIREMENT:{requirement['id']}"
+            add_node(
+                node_id,
+                "requirement",
+                requirement["statement"],
+                requirement_id=requirement["id"],
+                source=requirement["source"],
+            )
+            add_edge(change_node, "declares", node_id)
+            source = requirement["source"]
+            source_node = f"FILE:{source}"
+            if source_node not in nodes:
+                add_node(source_node, "requirement-source", Path(source).stem, path=source)
+            add_edge(node_id, "defined_by", source_node)
+
+        for claim in data["claims"]:
+            claim_node = f"CLAIM:{claim['id']}"
+            add_node(
+                claim_node,
+                "claim",
+                claim["statement"],
+                claim_id=claim["id"],
+                criticality=claim["criticality"],
+                residual_uncertainty=claim["residual_uncertainty"],
+            )
+            add_edge(change_node, "declares", claim_node)
+            for requirement_id in claim["requirement_ids"]:
+                add_edge(f"REQUIREMENT:{requirement_id}", "supported_by", claim_node)
+            for component in claim["scope"]["components"]:
+                component_node = f"COMPONENT:{component}"
+                add_node(component_node, "component", component)
+                add_edge(claim_node, "affects", component_node)
+            for affected_path in claim["scope"]["paths"]:
+                path_node = f"PATH:{affected_path}"
+                add_node(path_node, "code-path", affected_path, path=affected_path)
+                add_edge(claim_node, "affects", path_node)
+            for requirement in claim["evidence_requirements"]:
+                evidence_node = f"EVIDENCE_REQUIREMENT:{requirement['id']}"
+                add_node(
+                    evidence_node,
+                    "evidence-requirement",
+                    requirement["description"],
+                    evidence_id=requirement["id"],
+                    kind=requirement["kind"],
+                    gate=requirement.get("gate"),
+                    locator=requirement.get("locator"),
+                    artifact=requirement.get("artifact"),
+                    required=requirement["required"],
+                )
+                add_edge(claim_node, "verified_by", evidence_node)
+                locator = requirement.get("locator")
+                if locator:
+                    locator_node = f"PATH:{locator}"
+                    if locator_node not in nodes:
+                        add_node(locator_node, "verification-locator", locator, path=locator)
+                    add_edge(evidence_node, "located_at", locator_node)
+                artifact = requirement.get("artifact")
+                if artifact:
+                    artifact_node = f"FILE:{artifact}"
+                    if artifact_node not in nodes:
+                        add_node(artifact_node, "review-artifact", Path(artifact).stem, path=artifact)
+                    add_edge(evidence_node, "recorded_in", artifact_node)
+
+        for check in human_checks:
+            check_node = f"HUMAN_CHECK:{check['id']}"
+            add_node(
+                check_node,
+                "human-check",
+                check["statement"],
+                human_check_id=check["id"],
+                level=check["level"],
+                status=check["status"],
+            )
+            for claim_id in check["claim_ids"]:
+                add_edge(f"CLAIM:{claim_id}", "requires_human_check", check_node)
+
+        for group, paths in data["references"].items():
+            for raw_path in paths:
+                file_node = f"FILE:{raw_path}"
+                if file_node not in nodes:
+                    add_node(file_node, group.rstrip("s"), Path(raw_path).stem, path=raw_path)
+                add_edge(change_node, "references", file_node)
+
+    fingerprint = hashlib.sha256()
+    relative_sources = []
+    for path in sorted(source_paths):
+        relative = path.relative_to(root).as_posix()
+        relative_sources.append(relative)
+        fingerprint.update(relative.encode("utf-8"))
+        fingerprint.update(b"\0")
+        fingerprint.update(path.read_bytes())
+        fingerprint.update(b"\0")
+
+    result = {
+        "schema_version": "1.0",
+        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "source_fingerprint": fingerprint.hexdigest(),
+        "source_files": relative_sources,
+        "nodes": [nodes[key] for key in sorted(nodes)],
+        "edges": [
+            {"from": source, "relation": relation, "to": target}
+            for source, relation, target in sorted(edges)
+        ],
+        "warnings": warnings,
+    }
+    dump_json(result, output)
+    try:
+        display_output = output.relative_to(root)
+    except ValueError:
+        display_output = output
+    print(
+        f"Project index: {display_output} "
+        f"({len(result['nodes'])} nodes, {len(result['edges'])} edges)"
+    )
+    return 1 if invalid else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

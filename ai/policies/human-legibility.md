@@ -5,8 +5,9 @@ AI autonomy and human understanding are separate concerns. Do not interrupt auto
 ## Three separate layers
 
 1. **Audit evidence** — raw/tool-level evidence such as verification logs, CI artifacts, traces, and agent/tool telemetry. Keep this out of normal human-facing docs and out of Git when it may contain sensitive/transient data.
-2. **Durable knowledge** — concise repository records explaining material changes, decisions, concepts, invariants, and runbooks.
-3. **Approval** — only for a real human decision or risk acceptance. Unfamiliarity alone is not an approval trigger.
+2. **Assurance state** — Claims, their required proof, unresolved uncertainty, and explicit Human Checks under `assurance/`.
+3. **Durable knowledge** — concise repository records explaining material changes, decisions, concepts, invariants, and runbooks.
+4. **Approval** — only for a real human decision or risk acceptance. Unfamiliarity alone is not an approval trigger.
 
 ## Knowledge Impact
 
@@ -40,6 +41,8 @@ Any statement answering **why** must be labeled when material:
 
 Do not expose or store private chain-of-thought. Preserve decisions and evidence, not hidden reasoning traces.
 
+Prefer relationship-first records. Store user intent, constraints, decisions, rejected material alternatives, invariants, failure modes, risk acceptance, Claim/Evidence links, and authoritative external references. Do not persist line-by-line explanations, framework tutorials, work narration, or file trees that can be derived later.
+
 ## Human attention
 
 Understanding does not imply interruption:
@@ -69,3 +72,4 @@ If the answer depends on the original chat/transcript, improve the durable docs.
 - Link to canonical docs instead of repeating tutorials.
 - Keep LOW records inline; only MATERIAL/CRITICAL create standalone change docs.
 - Specialist legibility review receives the Change Brief + relevant diff/docs, not the original agent history.
+- Audience familiarity controls generated explanation depth only; it never lowers assurance or release requirements. See `ai/policies/adaptive-explanation.md`.
