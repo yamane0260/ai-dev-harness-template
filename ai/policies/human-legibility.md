@@ -73,3 +73,11 @@ If the answer depends on the original chat/transcript, improve the durable docs.
 - Keep LOW records inline; only MATERIAL/CRITICAL create standalone change docs.
 - Specialist legibility review receives the Change Brief + relevant diff/docs, not the original agent history.
 - Audience familiarity controls generated explanation depth only; it never lowers assurance or release requirements. See `ai/policies/adaptive-explanation.md`.
+
+## Understanding can reveal an incorrect implementation
+
+Apply `ai/policies/mutual-verification.md`.
+A mismatch between a maintainer's prediction and the implementation is an open
+question until evidence locates the cause.
+Correct the requirement, implementation, test or explanation as appropriate.
+Do not treat reproducing the implementer's explanation as proof of understanding.

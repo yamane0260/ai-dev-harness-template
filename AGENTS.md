@@ -58,3 +58,11 @@ Do not raise one classification merely because another is high; use its own defi
 ./scripts/ai/validate-assurance --manifest assurance/current/<change>/manifest.json
 ./scripts/ai/build-project-index
 ```
+
+## Mutual verification
+
+Apply `ai/policies/mutual-verification.md` during implementation, review,
+explanation and release.
+Do not assume either AI implementation or human criticism is correct.
+Route disagreements to requirements, implementation, tests or explanation using
+observations; do not default to documentation-only repair.

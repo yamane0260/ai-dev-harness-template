@@ -30,9 +30,21 @@ Run verification and calculate readiness together with:
 ./scripts/ai/verify --risk yellow --assurance assurance/current/<change-id>/manifest.json
 ```
 
-For a release decision, add `--release`. This fails closed when a MUST Claim lacks current evidence, when required AI review records are absent, or when a MUST Human Check is pending/failed.
+After verification, create every declared structured review against the generated `evidence.json`. Evaluate release against that same run:
 
-If the manifest requires agent event coverage, first validate the JSONL trace with `validate-agent-trace --summary <path>`, then pass that path through `verify --agent-trace-summary <path>`. A summary proves only the coverage its capture source can actually claim.
+```sh
+./scripts/ai/validate-assurance \
+  --manifest assurance/current/<change-id>/manifest.json \
+  --evidence .ai-artifacts/verification/<run>/evidence.json \
+  --agent-trace-summary .ai-artifacts/traces/<trace-summary>.json \
+  --release
+```
+
+Omit `--agent-trace-summary` only when the manifest does not require Agent Trace coverage. This fails closed when a MUST Claim lacks current evidence, when required structured AI review records are invalid, stale, blocked, or absent, when required trace coverage is missing, or when a MUST Human Check is pending/failed. Running `verify` again creates a new evidence run, so its prior review cannot be reused.
+
+Use evidence kind `ai-review-record` for new reviews and create its JSON from `ai/templates/review-record.json` after verification. The record must reference the exact verification evidence file and hash. The older `ai-review` kind keeps existence-only semantics for historical manifests; do not use it for new requirements.
+
+If the manifest requires agent event coverage, first validate the JSONL trace with `validate-agent-trace --summary <path>`, then pass that path through both `verify --agent-trace-summary <path>` and the final `validate-assurance --agent-trace-summary <path> --release` call. A summary proves only the coverage its capture source can actually claim.
 
 ## Sources and derived data
 

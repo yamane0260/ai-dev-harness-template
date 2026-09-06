@@ -42,9 +42,11 @@ required=(
   "ai/templates/approval-packet.md"
   "ai/templates/assurance/manifest.json"
   "ai/templates/assurance/human-checks.json"
+  "ai/templates/review-record.json"
   "ai/schemas/assurance-manifest.schema.json"
   "ai/schemas/human-checks.schema.json"
   "ai/schemas/evidence-record.schema.json"
+  "ai/schemas/review-record.schema.json"
   "ai/schemas/agent-event.schema.json"
   "ai/schemas/project-index.schema.json"
   "ai/evals/quality-envelope/README.md"
@@ -106,6 +108,7 @@ else
   python_files=(
     scripts/ai/lib/__init__.py
     scripts/ai/lib/assurance_core.py
+    scripts/ai/lib/review_records.py
     scripts/ai/lib/agent_trace.py
     scripts/ai/validate-assurance
     scripts/ai/record-evidence
@@ -113,6 +116,7 @@ else
     scripts/ai/record-agent-event
     scripts/ai/validate-agent-trace
     scripts/ai/tests/test_assurance.py
+    scripts/ai/tests/test_review_records.py
     scripts/ai/tests/test_agent_trace.py
     scripts/ai/tests/test_project_index.py
   )
@@ -125,10 +129,12 @@ else
     ai/schemas/assurance-manifest.schema.json
     ai/schemas/human-checks.schema.json
     ai/schemas/evidence-record.schema.json
+    ai/schemas/review-record.schema.json
     ai/schemas/agent-event.schema.json
     ai/schemas/project-index.schema.json
     ai/templates/assurance/manifest.json
     ai/templates/assurance/human-checks.json
+    ai/templates/review-record.json
   )
   for json_file in "${json_files[@]}"; do
     if ! python3 -m json.tool "$json_file" >/dev/null; then

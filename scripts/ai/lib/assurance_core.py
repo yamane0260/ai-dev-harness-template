@@ -454,9 +454,13 @@ def validate_assurance(manifest_path: Path) -> dict[str, Any]:
                     _issue("TYPE", "required must be boolean", f"{evidence_location}.required")
                 )
             kind = evidence.get("kind")
-            if kind not in {"gate", "ai-review"}:
+            if kind not in {"gate", "ai-review", "ai-review-record"}:
                 errors.append(
-                    _issue("ENUM", "kind must be gate/ai-review", f"{evidence_location}.kind")
+                    _issue(
+                        "ENUM",
+                        "kind must be gate/ai-review/ai-review-record",
+                        f"{evidence_location}.kind",
+                    )
                 )
             elif kind == "gate":
                 if evidence.get("gate") not in GATES:
@@ -466,7 +470,7 @@ def validate_assurance(manifest_path: Path) -> dict[str, Any]:
                 _nonempty_string(
                     evidence.get("locator"), f"{evidence_location}.locator", errors
                 )
-            elif kind == "ai-review":
+            elif kind in {"ai-review", "ai-review-record"}:
                 artifact = evidence.get("artifact")
                 if _nonempty_string(artifact, f"{evidence_location}.artifact", errors):
                     artifact_path = _repo_relative_path(
@@ -476,7 +480,7 @@ def validate_assurance(manifest_path: Path) -> dict[str, Any]:
                         warnings.append(
                             _issue(
                                 "MISSING_REVIEW_ARTIFACT",
-                                f"AI review artifact does not exist yet: {artifact}",
+                                f"review artifact does not exist yet: {artifact}",
                                 evidence_location,
                             )
                         )
@@ -911,11 +915,7 @@ def evaluate_readiness(
     if check_revision:
         try:
             current = repository_revision(root)
-            revision_current = (
-                evidence_revision.get("commit") == current["commit"]
-                and evidence_revision.get("working_tree_fingerprint")
-                == current["working_tree_fingerprint"]
-            )
+            revision_current = evidence_revision == current
         except (OSError, subprocess.CalledProcessError, ValueError) as exc:
             blockers.append(_issue("REVISION_CHECK_FAILED", str(exc)))
         if not revision_current:
@@ -995,6 +995,11 @@ def evaluate_readiness(
             )
         )
 
+    manifest_claim_ids = {
+        item.get("id")
+        for item in validation.get("data", {}).get("claims", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
     for claim in validation.get("data", {}).get("claims", []):
         claim_id = claim.get("id")
         machine = "N/A"
@@ -1004,6 +1009,7 @@ def evaluate_readiness(
         claim_actions: list[dict[str, str]] = []
         required_gate_states = []
         required_review_states = []
+        required_review_blockers: list[dict[str, str]] = []
 
         for requirement in claim.get("evidence_requirements", []):
             if not requirement.get("required"):
@@ -1025,16 +1031,37 @@ def evaluate_readiness(
                 artifact = requirement.get("artifact")
                 artifact_path = (root / artifact).resolve() if artifact else manifest_dir
                 present = artifact_path.is_file() and artifact_path.stat().st_size > 0
-                required_review_states.append("PRESENT" if present else "MISSING")
+                required_review_states.append("PASS" if present else "FAIL")
                 if not present:
-                    claim_blockers.append(
-                        _issue(
-                            "REQUIRED_AI_REVIEW_MISSING",
-                            f"{claim_id} requires AI review artifact '{artifact}'",
-                            requirement.get("id", ""),
-                        )
+                    issue = _issue(
+                        "REQUIRED_AI_REVIEW_MISSING",
+                        f"{claim_id} requires legacy AI review artifact '{artifact}'",
+                        requirement.get("id", ""),
                     )
+                    required_review_blockers.append(issue)
+                    claim_blockers.append(issue)
+            elif requirement.get("kind") == "ai-review-record":
+                from .review_records import validate_review
 
+                review_issues = validate_review(
+                    root,
+                    requirement.get("artifact"),
+                    change_id=validation.get("change_id"),
+                    claim_id=claim_id,
+                    manifest_claim_ids=manifest_claim_ids,
+                    evidence=evidence,
+                )
+                if not revision_current:
+                    review_issues.append({
+                        "code": "REVIEW_REVISION_NOT_CURRENT",
+                        "message": "The reviewed verification revision is stale.",
+                        "location": requirement.get("id", ""),
+                    })
+                required_review_states.append(
+                    "PASS" if not review_issues else "FAIL"
+                )
+                required_review_blockers.extend(review_issues)
+                claim_blockers.extend(review_issues)
         if required_gate_states:
             if all(state == "PASS" for state in required_gate_states) and revision_current:
                 machine = "MACHINE_VERIFIED"
@@ -1045,7 +1072,7 @@ def evaluate_readiness(
         if required_review_states:
             ai_review = (
                 "AI_REVIEWED"
-                if all(state == "PRESENT" for state in required_review_states)
+                if all(state == "PASS" for state in required_review_states)
                 else "UNVERIFIED"
             )
 
@@ -1101,9 +1128,16 @@ def evaluate_readiness(
                         claim_id,
                     )
                 )
-        if claim.get("criticality") == "should" and (claim_blockers or claim_actions):
-            warnings.extend(claim_blockers + claim_actions)
-            claim_blockers = []
+        if claim.get("criticality") == "should" and (
+            claim_blockers or claim_actions
+        ):
+            warnings.extend(
+                item
+                for item in claim_blockers
+                if item not in required_review_blockers
+            )
+            warnings.extend(claim_actions)
+            claim_blockers = required_review_blockers
             claim_actions = []
 
         blockers.extend(claim_blockers)

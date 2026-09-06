@@ -13,13 +13,21 @@ description: Implement product features and behavior changes with context-effici
 6. For STANDARD/CRITICAL, delegate broad read-only exploration when supported and keep raw results out of the main context.
 7. Implement the smallest change using existing patterns. During work, record only non-reconstructable decisions, constraints, invariants, rejected material alternatives, and Claim relationships; do not produce long narration.
 8. Add/update focused tests/checks that prove requested behavior and material invariants/failure behavior.
-9. Run `./scripts/ai/verify --risk <level> --assurance <manifest>` when an assurance record exists. Invoke security/UX/design/code review only when its trigger applies. An AI review artifact is `AI_REVIEWED`, not `MACHINE_VERIFIED`.
-10. Use `review-assurance` for STANDARD/CRITICAL assurance records after evidence exists. Every MUST Claim must be supported or explicitly routed to a completed MUST Human Check before release.
-11. Apply `ai/policies/human-legibility.md` after the implementation is stable. Classify Knowledge Impact independently:
+9. Apply `ai/policies/human-legibility.md` and record completed Human Checks after the implementation is stable and before final exact-revision verification. Classify Knowledge Impact independently:
    - NONE: no extra record.
    - LOW: short inline Change Record only.
    - MATERIAL/CRITICAL: use `explain-change` to create an evidence-grounded Change Brief; update canonical concept/decision/runbook only if warranted.
-12. For MATERIAL/CRITICAL, run `review-legibility` in a fresh context when supported. A CRITICAL blocking readiness gap prevents release. Do not give the reviewer the original implementation transcript.
+10. Run `./scripts/ai/verify --risk <level> --assurance <manifest>` on the stable tracked state when an assurance record exists. Invoke security/UX/design/code review only when its trigger applies. An AI review artifact is `AI_REVIEWED`, not `MACHINE_VERIFIED`.
+11. Use `review-assurance` for STANDARD/CRITICAL assurance records after evidence exists. Every MUST Claim must be supported or explicitly routed to a completed MUST Human Check before release.
+12. For MATERIAL/CRITICAL, run `review-legibility` in a fresh context when supported. A CRITICAL blocking readiness gap prevents release. Do not give the reviewer the original implementation transcript. If assurance or legibility review changes a tracked file, repeat exact-revision verification and structured review.
 13. Invoke `prepare-approval` only when a non-automatable human decision remains. Knowledge/readiness documentation is not itself an approval trigger.
 
 Return a concise completion summary: outcome, material Quality Impact, verification/evidence path, assurance readiness, Knowledge Impact + one-sentence knowledge delta + record path if any, residual uncertainty/readiness gaps, and exact Human Checks still required.
+
+## Mutual verification
+
+Read `ai/policies/mutual-verification.md` when applying this workflow.
+Preserve and investigate material disagreements from either humans or agents.
+Correction is not restricted to explanation: requirements, implementation and
+test expectations remain revisable.
+Required review results use the structured review-record contract.

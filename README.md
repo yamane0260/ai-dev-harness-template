@@ -226,3 +226,14 @@ assurance semantics -> ai/policies/assurance.md
 ```
 
 The original AI session should be disposable. The repository should remain understandable and operable without it.
+
+## Mutual verification increment
+
+Implementation and understanding are mutually corrective activities.
+See `ai/policies/mutual-verification.md`.
+
+New required reviews use `ai-review-record`: structured JSON bound to a revision,
+verification run and hashed evidence.
+The legacy `ai-review` kind remains readable for historical manifests, but a
+present Markdown document cannot satisfy the new structured contract.
+This does not make AI or human reviewers infallible.

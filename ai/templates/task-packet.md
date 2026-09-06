@@ -43,3 +43,9 @@ Final Knowledge Impact is confirmed after implementation; do not create docs fro
 One short instruction to the receiving agent.
 
 Do not include broad search transcripts, full files, raw logs/screenshots, hidden reasoning, or general repository history. Open only listed evidence and expand context when required.
+
+## Material assumptions and discriminating cases
+
+- Expected outcome and its requirement/contract/example basis.
+- Unacceptable outcome or relevant boundary.
+- Important unverified assumption and how to distinguish competing interpretations.

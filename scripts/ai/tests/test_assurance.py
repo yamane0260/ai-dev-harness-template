@@ -109,6 +109,13 @@ class AssuranceReadinessTests(unittest.TestCase):
         self.assertEqual("BLOCKED", result["readiness"])
         self.assertFalse(result["revision_current"])
 
+    def test_dirty_flag_is_part_of_revision_identity(self) -> None:
+        evidence = self.evidence()
+        evidence["revision"]["dirty"] = not evidence["revision"]["dirty"]
+        result = evaluate_readiness(self.validation, evidence)
+        self.assertEqual("BLOCKED", result["readiness"])
+        self.assertFalse(result["revision_current"])
+
     def test_pending_must_human_check_requires_action(self) -> None:
         validation = copy.deepcopy(self.validation)
         validation["data"]["claims"][0]["human_check_ids"] = ["HC-EVAL-001"]
@@ -126,12 +133,12 @@ class AssuranceReadinessTests(unittest.TestCase):
         self.assertEqual("ACTION_REQUIRED", result["readiness"])
         self.assertEqual("HUMAN_REQUIRED", result["claims"][0]["human"])
 
-    def test_ai_review_alone_is_not_decisive(self) -> None:
+    def test_plain_markdown_is_not_structured_review_evidence(self) -> None:
         validation = copy.deepcopy(self.validation)
         validation["data"]["claims"][0]["evidence_requirements"] = [
             {
                 "id": "EVR-EVAL-AI",
-                "kind": "ai-review",
+                "kind": "ai-review-record",
                 "description": "Review fixture",
                 "required": True,
                 "artifact": "ai/evals/assurance/README.md",
@@ -139,7 +146,41 @@ class AssuranceReadinessTests(unittest.TestCase):
         ]
         result = evaluate_readiness(validation, self.evidence())
         self.assertEqual("BLOCKED", result["readiness"])
+        self.assertEqual("UNVERIFIED", result["claims"][0]["ai_review"])
+
+    def test_legacy_ai_review_artifact_remains_compatible(self) -> None:
+        validation = copy.deepcopy(self.validation)
+        validation["data"]["claims"][0]["evidence_requirements"].append(
+            {
+                "id": "EVR-EVAL-LEGACY-AI",
+                "kind": "ai-review",
+                "description": "Legacy review fixture",
+                "required": True,
+                "artifact": "ai/evals/assurance/README.md",
+            }
+        )
+        result = evaluate_readiness(validation, self.evidence())
+        self.assertEqual("READY", result["readiness"])
         self.assertEqual("AI_REVIEWED", result["claims"][0]["ai_review"])
+
+    def test_legacy_ai_review_alone_remains_non_decisive(self) -> None:
+        validation = copy.deepcopy(self.validation)
+        validation["data"]["claims"][0]["evidence_requirements"] = [
+            {
+                "id": "EVR-EVAL-LEGACY-AI",
+                "kind": "ai-review",
+                "description": "Legacy review fixture",
+                "required": True,
+                "artifact": "ai/evals/assurance/README.md",
+            }
+        ]
+        result = evaluate_readiness(validation, self.evidence())
+        self.assertEqual("BLOCKED", result["readiness"])
+        self.assertEqual("AI_REVIEWED", result["claims"][0]["ai_review"])
+        self.assertIn(
+            "NO_DECISIVE_EVIDENCE",
+            {item["code"] for item in result["blockers"]},
+        )
 
     def test_malformed_evidence_cannot_assert_ready(self) -> None:
         evidence = self.evidence()

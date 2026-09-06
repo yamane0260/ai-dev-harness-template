@@ -8,5 +8,7 @@ Expected properties:
 - broken references and unsupported MUST Claims are rejected;
 - PASS on a current required gate can produce `MACHINE_VERIFIED`;
 - N/A, missing, failing, or stale evidence cannot satisfy a required gate;
-- an AI review artifact is classified `AI_REVIEWED` and is not decisive proof by itself;
+- a legacy `ai-review` artifact remains compatible, while a new `ai-review-record` must pass structure, scope, revision, verification-run, and evidence-integrity checks;
+- a passing structured AI review is classified `AI_REVIEWED` and is not decisive proof by itself;
+- open blocking findings from a human or AI origin prevent readiness;
 - a pending MUST Human Check produces `ACTION_REQUIRED` and blocks release.

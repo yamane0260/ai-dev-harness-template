@@ -1,0 +1,67 @@
+{
+  "$schema": "../../../ai/schemas/assurance-manifest.schema.json",
+  "schema_version": "1.0",
+  "change": {
+    "id": "CHG-20260907-MUTUAL",
+    "title": "Review integrity and mutual correction",
+    "risk": "red",
+    "knowledge_impact": "material",
+    "status": "draft"
+  },
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "statement": "New required reviews must not pass solely through artifact presence, and unresolved blocking findings from either actor must block release without breaking historical review manifests.",
+      "source": "ai/policies/mutual-verification.md"
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLM-001",
+      "statement": "Readiness rejects invalid, stale, foreign-run or blocked structured reviews, preserves legacy review behavior, and does not allow a valid review to replace decisive evidence.",
+      "criticality": "must",
+      "requirement_ids": [
+        "REQ-001"
+      ],
+      "scope": {
+        "components": [
+          "assurance-readiness"
+        ],
+        "paths": [
+          "scripts/ai/lib/assurance_core.py",
+          "scripts/ai/lib/review_records.py",
+          "ai/schemas/assurance-manifest.schema.json",
+          "ai/schemas/review-record.schema.json"
+        ]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-001",
+          "kind": "gate",
+          "description": "Focused readiness and review-record regression tests",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_review_records.py"
+        },
+        {
+          "id": "EVR-REVIEW-001",
+          "kind": "ai-review-record",
+          "description": "Evidence-grounded review of expectations and counterexamples",
+          "required": true,
+          "artifact": ".ai-artifacts/reviews/CHG-20260907-MUTUAL/review.json"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Record checks do not prove reviewer identity, independence, oracle correctness, human understanding or complete defect detection. CI transport of ignored review artifacts and automatic manifest selection remain unimplemented."
+    }
+  ],
+  "human_checks_file": "human-checks.json",
+  "references": {
+    "specs": [
+      "ai/policies/mutual-verification.md"
+    ],
+    "decisions": [],
+    "concepts": [],
+    "runbooks": []
+  }
+}

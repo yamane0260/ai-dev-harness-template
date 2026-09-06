@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "change_id": "",
+  "claim_ids": [],
+  "revision": {
+    "commit": "",
+    "dirty": false,
+    "working_tree_fingerprint": ""
+  },
+  "verification": {
+    "run_id": "",
+    "evidence": {
+      "path": "",
+      "sha256": ""
+    }
+  },
+  "reviewer": {
+    "id": "",
+    "kind": "ai",
+    "context": "unknown"
+  },
+  "verdict": "PENDING",
+  "checks": [],
+  "findings": [],
+  "limitations": []
+}

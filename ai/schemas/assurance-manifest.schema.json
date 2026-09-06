@@ -136,7 +136,7 @@
       "required": ["id", "kind", "description", "required"],
       "properties": {
         "id": { "type": "string", "pattern": "^EVR-[A-Za-z0-9][A-Za-z0-9._-]*$" },
-        "kind": { "enum": ["gate", "ai-review"] },
+        "kind": { "enum": ["gate", "ai-review", "ai-review-record"] },
         "description": { "type": "string", "minLength": 1 },
         "required": { "type": "boolean" },
         "gate": {
@@ -163,6 +163,10 @@
         },
         {
           "if": { "properties": { "kind": { "const": "ai-review" } } },
+          "then": { "required": ["artifact"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "ai-review-record" } } },
           "then": { "required": ["artifact"] }
         }
       ]

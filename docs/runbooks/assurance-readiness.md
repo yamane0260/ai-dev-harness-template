@@ -18,14 +18,18 @@ Use when `validate-assurance` reports an invalid manifest, `verify` produces `AC
 3. For `REQUIRED_GATE_NOT_PASSING`, inspect only the named gate log from the latest run. Fix the product/check or correct an inaccurate Claim-to-gate mapping.
 4. For `NO_DECISIVE_EVIDENCE`, add a deterministic check or a genuinely necessary Human Check. An AI review alone is insufficient.
 5. For `MUST_HUMAN_CHECK_INCOMPLETE`, follow the bounded procedure in `human-checks.json`, record performer/time/evidence, then rerun release verification.
-6. For `REQUIRED_AI_REVIEW_MISSING`, run the relevant review against the diff/evidence and save its concise findings at the declared path.
-7. For reference/asymmetry errors, repair both directions of the Claim ↔ Human Check relationship and revalidate.
+6. For `REQUIRED_AI_REVIEW_MISSING`, create the legacy artifact only when reproducing a historical manifest. New manifests should declare `ai-review-record`.
+7. For `REVIEW_RECORD_INVALID`, compare the record with `ai/templates/review-record.json`. Confirm its Claim scope, AI reviewer kind, revision, verification run ID, evidence path/hash, and per-Claim boundary or counterexample.
+8. For `REVIEW_NOT_PASSING` or `UNRESOLVED_REVIEW_FINDING`, correct the actual requirement, implementation, test, or explanation. A tracked correction requires a new verification run and matching review.
+9. For reference/asymmetry errors, repair both directions of the Claim ↔ Human Check relationship and revalidate.
 
 ## Recover
 
 1. Make the smallest correction that resolves the real evidence or mapping gap.
-2. Rerun `./scripts/ai/verify --risk <level> --assurance <manifest> --release` on the final state.
-3. Confirm `readiness.json` says `READY` and the fingerprint is current.
+2. Complete and record pending Human Checks, then rerun `./scripts/ai/verify --risk <level> --assurance <manifest>` on the final tracked state.
+3. Create the required structured review against the generated evidence. If the review or later Human Check causes a tracked correction, return to step 2.
+4. Run `./scripts/ai/validate-assurance --manifest <manifest> --evidence <the-reviewed-evidence.json> --release`. Add `--agent-trace-summary <validated-summary.json>` when the manifest requires trace coverage.
+5. Confirm the result says `READY` and the fingerprint is current.
 
 ## Rollback / forward recovery
 

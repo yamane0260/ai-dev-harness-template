@@ -18,7 +18,7 @@ The committed manifest records the relationships and expected proof. `scripts/ai
 ## Evidence classes
 
 - `MACHINE_VERIFIED`: a declared deterministic gate passed on the current repository state.
-- `AI_REVIEWED`: an evidence-grounded AI review artifact exists. This is useful scrutiny, not independent machine proof.
+- `AI_REVIEWED`: a declared AI review requirement is satisfied. New `ai-review-record` requirements validate scope, exact revision, verification run, evidence hashes, verdict, and blocking findings. This is useful scrutiny, not independent machine proof.
 - `HUMAN_REQUIRED`: a linked check requires human judgment or observation and is not complete.
 - `HUMAN_VERIFIED`: the linked human check records performer, time, procedure/result evidence, and a passing result.
 - `UNVERIFIED`: required support is missing, failed, stale, or not applicable without an accepted reason.
@@ -52,8 +52,18 @@ Raw evidence is audit material. Keep it out of Git and normal model context; ret
 
 ## Release readiness
 
-`READY` means every MUST Claim has its required current gate evidence, required AI review artifacts exist, every linked MUST Human Check passed, and no blocking validation error remains.
+`READY` means every MUST Claim has its required current gate evidence, required review records pass their declared contract, every linked MUST Human Check passed, and no blocking validation error remains.
 
 `ACTION_REQUIRED` means human work is pending. `BLOCKED` means evidence failed, is missing/stale, a MUST Human Check failed, or the manifest is invalid.
 
 Readiness applies only to the declared Claims and scope. It is not a claim that the system is correct in every possible condition.
+
+## Required review record integrity
+
+Required review artifacts must satisfy `scripts/ai/lib/review_records.py`.
+Follow `ai/policies/mutual-verification.md` for generation and limitations.
+Use `ai-review-record` for new structured requirements.
+The older `ai-review` kind remains existence-only for historical manifest compatibility.
+Required review failure blocks readiness, including a review explicitly marked
+required on a SHOULD Claim.
+Review integrity does not substitute for decisive evidence.

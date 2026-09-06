@@ -17,6 +17,7 @@ This is the human entry point. Use it before browsing folders at random.
 | How to diagnose or recover | `docs/runbooks/`, `docs/RELIABILITY.md` | Current operational procedure |
 | What the AI actually executed | `.ai-artifacts/traces/` | Host-captured audit evidence; generated and not committed |
 | What verification actually ran | `.ai-artifacts/verification/` | Exact-revision commands, results, logs, and hashes |
+| What a required AI review checked | `.ai-artifacts/reviews/`, then `ai/policies/mutual-verification.md` | Exact-run structured review and its limits |
 
 ## Folder roles
 
@@ -37,8 +38,9 @@ A green command, an AI review, a provenance record, and a human review answer di
 2. Claims state the property that must be true.
 3. Evidence requirements state how that property can be checked.
 4. Verification records what actually ran on an exact repository state.
-5. Human checks isolate judgments or real-device observations that automation cannot establish.
-6. Durable docs preserve decisions, invariants, failure modes, and recovery knowledge.
-7. Agent traces show actions and control boundaries; they do not prove product correctness.
+5. Structured AI reviews test expectations and counterexamples against that verification evidence; they remain non-decisive.
+6. Human checks isolate judgments or real-device observations that automation cannot establish.
+7. Durable docs preserve decisions, invariants, failure modes, and recovery knowledge.
+8. Agent traces show actions and control boundaries; they do not prove product correctness.
 
 Run `./scripts/ai/build-project-index` to derive a machine-readable relationship graph under `.ai-artifacts/index/`. The derived index is never the source of truth.

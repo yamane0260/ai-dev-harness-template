@@ -14,3 +14,11 @@ description: Explain an AI-developed system, change, component, function, or sel
 7. Do not write a permanent tutorial unless the explanation reveals a reusable project-specific concept or missing readiness knowledge. Otherwise answer on demand.
 
 Return a concise explanation with paths/Claim IDs that let the reader drill one level deeper.
+
+## Mutual verification
+
+Read `ai/policies/mutual-verification.md` when applying this workflow.
+Preserve and investigate material disagreements from either humans or agents.
+Correction is not restricted to explanation: requirements, implementation and
+test expectations remain revisable.
+Required review results use the structured review-record contract.

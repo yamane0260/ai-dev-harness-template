@@ -27,7 +27,15 @@ For `CRITICAL` operational knowledge, require a concrete current runbook when a 
 Return only:
 - result: PASS / NEEDS-DOC-FIX / BLOCKING-READINESS-GAP;
 - missing or misleading knowledge, with paths/evidence;
-- minimal documentation correction required;
+- correction target and evidence: requirement, implementation, test or explanation;
 - whether the gap affects release readiness.
 
 Do not turn a documentation/readiness gap into ceremonial human approval. Approval remains a separate policy decision.
+
+## Mutual verification
+
+Read `ai/policies/mutual-verification.md` when applying this workflow.
+Preserve and investigate material disagreements from either humans or agents.
+Correction is not restricted to explanation: requirements, implementation and
+test expectations remain revisable.
+Required review results use the structured review-record contract.

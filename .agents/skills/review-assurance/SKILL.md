@@ -15,6 +15,7 @@ Use a fresh context when supported. Receive the Task Packet/spec, active assuran
 6. Confirm a Human Check is used only where automation cannot establish the property, and that its procedure and expected observation are executable by the named audience.
 7. Check residual uncertainty and scope exclusions are explicit. Do not infer full-system safety from a narrow Claim.
 8. Report only material gaps. Fix manifest wording/relationships when the evidence is sound; add tests/checks when proof is missing; do not weaken the Claim merely to obtain READY.
+9. When a Claim declares `ai-review-record`, save the actual result from `ai/templates/review-record.json` at the declared path. Bind it to the supplied evidence file and run ID, cover every listed Claim with a boundary or counterexample, and keep open blocking findings visible. Only an AI-authored record can establish `AI_REVIEWED`; human observations remain finding origins or Human Checks.
 
 Return:
 
@@ -23,3 +24,11 @@ Return:
 - stale/missing evidence;
 - exact Human Checks still required;
 - minimal correction and whether release is blocked.
+
+## Mutual verification
+
+Read `ai/policies/mutual-verification.md` when applying this workflow.
+Preserve and investigate material disagreements from either humans or agents.
+Correction is not restricted to explanation: requirements, implementation and
+test expectations remain revisable.
+Required review results use the structured review-record contract.

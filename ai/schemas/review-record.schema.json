@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/review-record.schema.json",
+  "title": "AI Dev Harness structured AI review record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "change_id",
+    "claim_ids",
+    "revision",
+    "verification",
+    "reviewer",
+    "verdict",
+    "checks",
+    "findings",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "change_id": {
+      "type": "string",
+      "pattern": "^CHG-[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "claim_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/claimId" }
+    },
+    "revision": { "$ref": "#/$defs/revision" },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run_id", "evidence"],
+      "properties": {
+        "run_id": { "$ref": "#/$defs/nonemptyString" },
+        "evidence": { "$ref": "#/$defs/evidenceReference" }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "context"],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonemptyString" },
+        "kind": { "const": "ai" },
+        "context": { "enum": ["fresh", "shared", "unknown"] }
+      }
+    },
+    "verdict": { "enum": ["PENDING", "PASS", "BLOCKED"] },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "limitations": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonemptyString" }
+    }
+  },
+  "$defs": {
+    "nonemptyString": { "type": "string", "minLength": 1 },
+    "claimId": {
+      "type": "string",
+      "pattern": "^CLM-[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "dirty", "working_tree_fingerprint"],
+      "properties": {
+        "commit": { "$ref": "#/$defs/nonemptyString" },
+        "dirty": { "type": "boolean" },
+        "working_tree_fingerprint": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonemptyString" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "kind",
+        "basis",
+        "scenario",
+        "expected",
+        "observed",
+        "evidence"
+      ],
+      "properties": {
+        "claim_id": { "$ref": "#/$defs/claimId" },
+        "kind": { "enum": ["example", "boundary", "counterexample"] },
+        "basis": { "$ref": "#/$defs/nonemptyString" },
+        "scenario": { "$ref": "#/$defs/nonemptyString" },
+        "expected": { "$ref": "#/$defs/nonemptyString" },
+        "observed": { "$ref": "#/$defs/nonemptyString" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidenceReference" }
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "claim_ids",
+        "origin",
+        "target",
+        "severity",
+        "statement",
+        "status",
+        "resolution",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/nonemptyString" },
+        "claim_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/claimId" }
+        },
+        "origin": { "enum": ["ai", "human"] },
+        "target": {
+          "enum": [
+            "requirement",
+            "implementation",
+            "test",
+            "explanation",
+            "unknown"
+          ]
+        },
+        "severity": { "enum": ["blocking", "advisory"] },
+        "statement": { "$ref": "#/$defs/nonemptyString" },
+        "status": { "enum": ["open", "resolved", "rejected"] },
+        "resolution": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceReference" }
+        }
+      }
+    }
+  }
+}
