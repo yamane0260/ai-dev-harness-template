@@ -116,6 +116,7 @@ else
     scripts/ai/record-agent-event
     scripts/ai/validate-agent-trace
     scripts/ai/tests/test_assurance.py
+    scripts/ai/tests/test_classify_risk.py
     scripts/ai/tests/test_review_records.py
     scripts/ai/tests/test_agent_trace.py
     scripts/ai/tests/test_project_index.py

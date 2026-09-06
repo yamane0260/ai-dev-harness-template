@@ -7,6 +7,7 @@ A tiny auth change can therefore be CRITICAL/RED, while a broad but low-conseque
 ## General rules
 
 1. `./scripts/ai/classify-risk` provides a deterministic **risk floor** from the diff.
+   Diff size or early pattern matches must not make this floor fall back to a lower level; a harness-sensitive path remains RED even in a large diff.
 2. An agent may raise risk based on consequences or uncertainty.
 3. An agent must not lower the deterministic floor without an explicit human decision recorded in the PR.
 4. Unknowns increase risk. A blocking unknown prevents release.

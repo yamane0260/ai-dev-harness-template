@@ -53,15 +53,15 @@ red_pattern='(^|/)(auth|authentication|authorization|permissions?|roles?|migrati
 yellow_pattern='(^|/)(api|routes?|controllers?|components?|pages?|ui|frontend|backend|data|integrations?|assurance)(/|\.|$)|package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|pyproject\.toml|poetry\.lock|Cargo\.toml|Cargo\.lock|go\.mod|go\.sum|docs/DESIGN\.md|schema|contract|dependency'
 destructive_pattern='(^|[^A-Z])(DROP[[:space:]]+(TABLE|DATABASE|SCHEMA)|TRUNCATE[[:space:]]+TABLE|DELETE[[:space:]]+FROM|destroy|purge|hard[ -]?delete)'
 
-if printf '%s\n' "$haystack" | grep -Eiq "$red_pattern"; then
+if grep -Eiq "$red_pattern" <<< "$haystack"; then
   level="red"
   reasons+=("security/data/production/harness-sensitive paths or terms changed")
 fi
-if printf '%s\n' "$diff" | grep -Eiq "$destructive_pattern"; then
+if grep -Eiq "$destructive_pattern" <<< "$diff"; then
   level="red"
   reasons+=("potentially destructive operation detected")
 fi
-if [[ "$level" == "green" ]] && printf '%s\n' "$haystack" | grep -Eiq "$yellow_pattern"; then
+if [[ "$level" == "green" ]] && grep -Eiq "$yellow_pattern" <<< "$haystack"; then
   level="yellow"
   reasons+=("user-facing/API/data/dependency surface changed")
 fi

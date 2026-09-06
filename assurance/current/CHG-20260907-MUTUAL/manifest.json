@@ -13,6 +13,11 @@
       "id": "REQ-001",
       "statement": "New required reviews must not pass solely through artifact presence, and unresolved blocking findings from either actor must block release without breaking historical review manifests.",
       "source": "ai/policies/mutual-verification.md"
+    },
+    {
+      "id": "REQ-002",
+      "statement": "A large diff must not lower the deterministic risk floor when it contains a harness-sensitive path or term.",
+      "source": "ai/policies/risk-policy.md"
     }
   ],
   "claims": [
@@ -53,12 +58,50 @@
       ],
       "human_check_ids": [],
       "residual_uncertainty": "Record checks do not prove reviewer identity, independence, oracle correctness, human understanding or complete defect detection. CI transport of ignored review artifacts and automatic manifest selection remain unimplemented."
+    },
+    {
+      "id": "CLM-002",
+      "statement": "Risk classification returns RED without a broken-pipe downgrade for a large committed diff that changes a harness-sensitive policy path.",
+      "criticality": "must",
+      "requirement_ids": [
+        "REQ-002"
+      ],
+      "scope": {
+        "components": [
+          "risk-classification"
+        ],
+        "paths": [
+          "scripts/ai/classify-risk",
+          "scripts/ai/tests/test_classify_risk.py",
+          "ai/policies/risk-policy.md"
+        ]
+      },
+      "evidence_requirements": [
+        {
+          "id": "EVR-002",
+          "kind": "gate",
+          "description": "Large-diff risk-classifier regression test",
+          "required": true,
+          "gate": "unit",
+          "locator": "scripts/ai/tests/test_classify_risk.py"
+        },
+        {
+          "id": "EVR-REVIEW-002",
+          "kind": "ai-review-record",
+          "description": "Evidence-grounded review of the large-diff classification boundary",
+          "required": true,
+          "artifact": ".ai-artifacts/reviews/CHG-20260907-MUTUAL/review.json"
+        }
+      ],
+      "human_check_ids": [],
+      "residual_uncertainty": "Pattern matching supplies only a deterministic floor and cannot identify every semantically risky change; agents must still raise risk for consequences or uncertainty."
     }
   ],
   "human_checks_file": "human-checks.json",
   "references": {
     "specs": [
-      "ai/policies/mutual-verification.md"
+      "ai/policies/mutual-verification.md",
+      "ai/policies/risk-policy.md"
     ],
     "decisions": [],
     "concepts": [],
