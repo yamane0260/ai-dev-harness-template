@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "id": "balanced",
+  "description": "Balance delivery speed, autonomy, human understanding, quality assurance, and context efficiency for normal project work.",
+  "objectives": {
+    "delivery_speed": "high",
+    "autonomy": "high",
+    "human_understanding": "medium",
+    "handoff_depth": "medium",
+    "human_attention": "low",
+    "context_efficiency": "high"
+  },
+  "constraints": {
+    "risk_policy": {
+      "allow_below_deterministic_floor": false
+    },
+    "required_capabilities": [
+      {
+        "capability": "risk.floor",
+        "contract_version": 1,
+        "when": "always"
+      },
+      {
+        "capability": "profile.resolve",
+        "contract_version": 1,
+        "when": "always"
+      },
+      {
+        "capability": "verification.run",
+        "contract_version": 1,
+        "when": "selected"
+      },
+      {
+        "capability": "assurance.evaluate",
+        "contract_version": 1,
+        "when": "risk-yellow-or-higher"
+      }
+    ],
+    "release": {
+      "require_assurance_for": ["YELLOW", "RED"],
+      "require_human_go_no_go_for_red": true
+    }
+  },
+  "understanding": {
+    "requirement": "WORKING",
+    "knowledge_impact_policy": "durable-on-material",
+    "fresh_legibility_review": "material"
+  },
+  "context_budget": {
+    "strategy": "balanced",
+    "parent_tokens": 36000,
+    "plugin_instruction_tokens": 8000,
+    "tool_result_tokens": 10000,
+    "child_context_isolation_preferred": true,
+    "compaction_allowed": true
+  },
+  "routing": {
+    "prefer_fresh_context_reviews": true,
+    "prefer_structured_parent_outputs": true,
+    "allow_advisory_capabilities_to_be_skipped": true
+  }
+}
