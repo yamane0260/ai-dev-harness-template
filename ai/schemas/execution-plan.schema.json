@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/execution-plan.schema.json",
+  "title": "AI Dev Harness V4 Execution Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "plan_id",
+    "profile_id",
+    "risk",
+    "host",
+    "selected",
+    "skipped",
+    "context_budget",
+    "composition"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "plan_id": { "type": "string", "minLength": 1 },
+    "profile_id": { "type": "string", "minLength": 1 },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["floor", "effective"],
+      "properties": {
+        "floor": { "enum": ["GREEN", "YELLOW", "RED"] },
+        "effective": { "enum": ["GREEN", "YELLOW", "RED"] },
+        "reasons": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "coverage"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "coverage": { "enum": ["FULL", "PARTIAL", "MINIMAL"] },
+        "missing_capabilities": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "selected": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/selectedCapability" },
+      "minItems": 1
+    },
+    "skipped": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/skippedCapability" }
+    },
+    "context_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_tokens", "plugin_instruction_tokens", "tool_result_tokens"],
+      "properties": {
+        "parent_tokens": { "type": "integer", "minimum": 0 },
+        "plugin_instruction_tokens": { "type": "integer", "minimum": 0 },
+        "tool_result_tokens": { "type": "integer", "minimum": 0 },
+        "child_context_isolation": { "enum": ["required", "preferred", "unavailable"] },
+        "compaction_allowed": { "type": "boolean" }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kernel_version", "compiler_version", "composition_hash_inputs"],
+      "properties": {
+        "kernel_version": { "type": "string", "minLength": 1 },
+        "compiler_version": { "type": "string", "minLength": 1 },
+        "composition_hash": { "type": "string" },
+        "composition_hash_inputs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "invalid_reasons": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "selectedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "contract_version", "provider", "required", "reason"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+        },
+        "contract_version": { "type": "integer", "minimum": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "provider_version": { "type": "string" },
+        "required": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "context_budget_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "skippedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "reason"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
