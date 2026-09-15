@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/plugin-manifest.schema.json",
+  "title": "AI Dev Harness V4 Plugin Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "implements",
+    "permissions",
+    "context",
+    "failure",
+    "lifecycle",
+    "cost"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "description": { "type": "string" },
+    "implements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "contract_version"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "requires": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/capabilityRef" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "conflicts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "ordering": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "before": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "after": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filesystem",
+        "shell",
+        "network",
+        "credentials",
+        "git_push",
+        "deployment",
+        "external_side_effects"
+      ],
+      "properties": {
+        "filesystem": {
+          "enum": ["none", "read", "write-scoped", "read-write"]
+        },
+        "shell": { "type": "boolean" },
+        "network": { "type": "boolean" },
+        "credentials": { "type": "boolean" },
+        "git_push": { "type": "boolean" },
+        "deployment": { "type": "boolean" },
+        "external_side_effects": { "type": "boolean" }
+      }
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requires": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "prefers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "supported_hosts": {
+          "type": "array",
+          "items": {
+            "enum": ["codex", "claude-code", "cursor", "deepseek-harness", "generic"]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discovery",
+        "instructions",
+        "raw_outputs",
+        "parent_output",
+        "parent_budget_tokens"
+      ],
+      "properties": {
+        "discovery": {
+          "enum": ["catalog-only", "metadata", "eager"]
+        },
+        "instructions": {
+          "enum": ["on-demand", "eager"]
+        },
+        "raw_outputs": {
+          "enum": ["isolated", "artifact-only", "parent-visible"]
+        },
+        "parent_output": {
+          "enum": ["structured", "summary", "reference-only", "full"]
+        },
+        "parent_budget_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "POLICY",
+              "AUTHORITATIVE_PROJECT",
+              "VERIFIED_ARTIFACT",
+              "DERIVED",
+              "AGENT_GENERATED",
+              "EXTERNAL_UNTRUSTED"
+            ]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["block", "fallback", "retry", "advisory"]
+        },
+        "fallback_providers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "silent_downgrade_allowed": {
+          "const": false
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "enum": ["stateless", "temporary", "persistent"]
+        },
+        "teardown_required": { "type": "boolean" },
+        "teardown_description": { "type": "string" }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context", "model_calls", "wall_time", "human_attention"],
+      "properties": {
+        "context": { "enum": ["none", "low", "medium", "high"] },
+        "model_calls": { "enum": ["none", "low", "medium", "high"] },
+        "wall_time": { "enum": ["low", "medium", "high"] },
+        "human_attention": { "enum": ["none", "low", "medium", "high"] }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "produces": {
+          "enum": [
+            "none",
+            "machine-evidence",
+            "ai-review",
+            "human-check",
+            "decision-support",
+            "audit",
+            "knowledge",
+            "routing"
+          ]
+        },
+        "decisive": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "capabilityRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "contract_version"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  }
+}
