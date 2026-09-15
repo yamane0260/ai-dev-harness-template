@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/profile.schema.json",
+  "title": "AI Dev Harness V4 Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "objectives",
+    "constraints",
+    "understanding",
+    "context_budget"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "description": { "type": "string" },
+    "extends": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "objectives": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "delivery_speed",
+        "autonomy",
+        "human_understanding",
+        "handoff_depth",
+        "human_attention",
+        "context_efficiency"
+      ],
+      "properties": {
+        "delivery_speed": { "$ref": "#/$defs/priority" },
+        "autonomy": { "$ref": "#/$defs/priority" },
+        "human_understanding": { "$ref": "#/$defs/priority" },
+        "handoff_depth": { "$ref": "#/$defs/priority" },
+        "human_attention": { "$ref": "#/$defs/inversePriority" },
+        "context_efficiency": { "$ref": "#/$defs/priority" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk_policy", "required_capabilities"],
+      "properties": {
+        "risk_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allow_below_deterministic_floor"],
+          "properties": {
+            "minimum": {
+              "enum": ["GREEN", "YELLOW", "RED"]
+            },
+            "allow_below_deterministic_floor": {
+              "const": false
+            }
+          }
+        },
+        "required_capabilities": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/capabilityConstraint" },
+          "uniqueItems": true
+        },
+        "forbidden_providers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "required_providers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "permissions_ceiling": {
+          "$ref": "#/$defs/permissions"
+        },
+        "release": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "require_assurance_for": {
+              "type": "array",
+              "items": { "enum": ["GREEN", "YELLOW", "RED"] },
+              "uniqueItems": true
+            },
+            "require_human_go_no_go_for_red": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "understanding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement", "knowledge_impact_policy"],
+      "properties": {
+        "requirement": {
+          "enum": ["NONE", "WORKING", "MAINTAINER", "EXPLAINABLE"]
+        },
+        "knowledge_impact_policy": {
+          "enum": ["inherit-v3", "none", "durable-on-material", "durable-always"]
+        },
+        "fresh_legibility_review": {
+          "enum": ["never", "material", "critical", "always"]
+        }
+      }
+    },
+    "context_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "parent_tokens", "plugin_instruction_tokens", "tool_result_tokens"],
+      "properties": {
+        "strategy": {
+          "enum": ["strict", "balanced", "generous"]
+        },
+        "parent_tokens": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "plugin_instruction_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tool_result_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "child_context_isolation_preferred": { "type": "boolean" },
+        "compaction_allowed": { "type": "boolean" }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefer_fresh_context_reviews": { "type": "boolean" },
+        "prefer_structured_parent_outputs": { "type": "boolean" },
+        "allow_advisory_capabilities_to_be_skipped": { "type": "boolean" }
+      }
+    }
+  },
+  "$defs": {
+    "priority": {
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "inversePriority": {
+      "enum": ["minimize", "low", "medium", "high"]
+    },
+    "capabilityConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "contract_version", "when"],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+        },
+        "contract_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "when": {
+          "enum": ["always", "selected", "release", "risk-yellow-or-higher", "risk-red", "quality-impact", "claim-required"]
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "filesystem": { "enum": ["none", "read", "write-scoped", "read-write"] },
+        "shell": { "type": "boolean" },
+        "network": { "type": "boolean" },
+        "credentials": { "type": "boolean" },
+        "git_push": { "type": "boolean" },
+        "deployment": { "type": "boolean" },
+        "external_side_effects": { "type": "boolean" }
+      }
+    }
+  }
+}

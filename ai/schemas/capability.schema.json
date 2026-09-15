@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/capability.schema.json",
+  "title": "AI Dev Harness V4 Capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "contract_version",
+    "purpose",
+    "inputs",
+    "outputs",
+    "evidence_semantics",
+    "context",
+    "failure"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9-]*)+$"
+    },
+    "contract_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/field"
+      },
+      "uniqueItems": true
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/field"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": {
+          "enum": ["required", "optional", "on-demand", "disabled"]
+        },
+        "triggers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "evidence_semantics": {
+      "enum": [
+        "machine-evidence",
+        "ai-review",
+        "human-decision-support",
+        "durable-knowledge",
+        "routing-state",
+        "constraint-state",
+        "audit-state",
+        "implementation-output",
+        "explanation",
+        "release-state",
+        "derived-state"
+      ]
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_output"],
+      "properties": {
+        "parent_output": {
+          "enum": ["structured", "summary", "reference-only", "full"]
+        },
+        "fresh_context_preferred": {
+          "type": "boolean"
+        },
+        "fresh_context_required": {
+          "type": "boolean"
+        },
+        "raw_output_parent_visible": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_mode"],
+      "properties": {
+        "default_mode": {
+          "enum": ["block", "fallback", "retry", "advisory"]
+        },
+        "required_capability_may_degrade": {
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "required"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string"
+        },
+        "schema_ref": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
