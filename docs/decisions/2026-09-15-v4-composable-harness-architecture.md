@@ -1,6 +1,6 @@
 # V4 Composable Harness Architecture
 
-Status: proposed architecture contract for the V3 to V4 migration.
+Status: accepted and active. V4 is the authoritative composition model.
 
 This decision defines the target architecture before runtime behavior is migrated.
 The current V3 workflow remains authoritative until the migration phases described below are completed and verified.
@@ -160,7 +160,7 @@ A required capability with no valid provider makes the execution plan invalid or
 
 ## Migration strategy
 
-V4 is introduced without a big-bang rewrite.
+V4 was introduced without discarding deterministic V3-era assets.
 
 1. Define contracts, schemas, presets, and the migration map while V3 remains authoritative.
 2. Wrap existing V3 skills and scripts as candidate V4 providers without changing their internal behavior.
@@ -175,4 +175,4 @@ V4 is introduced without a big-bang rewrite.
 
 V4 will evolve the repository from an instruction-oriented workflow into a composition-oriented harness.
 V3 assurance, mutual-verification, quality, and human-legibility semantics remain source material for V4 rather than being discarded.
-The first implementation increment is contract-first and non-operative: it adds the V4 architecture, capability inventory, schemas, presets, and migration map without changing the current V3 execution path.
+The active implementation includes the V4 compiler/runtime entrypoint, provider registry, bounded run events, self-description metadata, and project-local Dashboard. V3 fixed routing is retired; surviving V3 assets operate only as provider implementations.
