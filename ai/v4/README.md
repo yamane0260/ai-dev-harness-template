@@ -1,67 +1,61 @@
-# V4 Contract Index
+# V4 Runtime and Contract Index
 
-This directory defines the contract-first V4 architecture while the V3 runtime remains authoritative.
-The files here are design and interchange sources for the migration and MUST NOT be treated as proof that the V4 runtime already exists.
+V4 is the active harness architecture.
 
-## Sources
+It combines a small constitutional kernel, semantic capabilities, swappable providers, profiles, bounded runtime records, and a project-local self-describing Dashboard.
 
-- [`capabilities.md`](capabilities.md) defines the initial capability inventory and the semantic contract for each capability.
-- [`migration-map.md`](migration-map.md) maps current V3 files and responsibilities into V4 destinations.
-- [`profiles/`](profiles/) contains representative presets that validate the profile model without changing current execution.
-- [`../schemas/capability.schema.json`](../schemas/capability.schema.json) defines capability descriptors.
-- [`../schemas/plugin-manifest.schema.json`](../schemas/plugin-manifest.schema.json) defines provider metadata, permissions, context policy, composition, lifecycle, and failure semantics.
-- [`../schemas/profile.schema.json`](../schemas/profile.schema.json) defines objectives, constraints, understanding requirements, and context budgets.
-- [`../schemas/execution-plan.schema.json`](../schemas/execution-plan.schema.json) defines the inspectable output expected from the future profile compiler.
+## Active runtime sources
 
-The architecture decision is recorded in [`docs/decisions/2026-09-15-v4-composable-harness-architecture.md`](../../docs/decisions/2026-09-15-v4-composable-harness-architecture.md).
+- `capabilities.md`: semantic capability contracts.
+- `profiles/*.json`: optimization presets and non-negotiable constraints.
+- `provider-registry.json`: capability-to-provider implementations.
+- `self-description.json`: human-facing architecture and explanation metadata used by the Dashboard without LLM calls.
+- `../schemas/capability.schema.json`: capability descriptor contract.
+- `../schemas/plugin-manifest.schema.json`: provider metadata and execution boundary.
+- `../schemas/profile.schema.json`: profile contract.
+- `../schemas/execution-plan.schema.json`: compiled execution plan.
+- `../schemas/run-event.schema.json`: append-only bounded run event.
+- `../schemas/project-dashboard.schema.json`: project-local Dashboard configuration.
+- `../../scripts/ai/v4.py`: runtime CLI and Dashboard entrypoint.
 
-## Design boundary
-
-V4 separates five concerns that are mixed across several V3 workflow documents.
-
-1. **Kernel invariants** are non-negotiable trust and release rules.
-2. **Capabilities** state what result or semantic service is required.
-3. **Plugins/providers** state how a capability is supplied and under which permissions, context, host, lifecycle, and failure conditions.
-4. **Profiles** state optimization objectives and non-negotiable project constraints.
-5. **Runtime substrates** store context metrics, evidence, run events, and durable project state without conflating them.
-
-A profile MAY prefer less explanation, fewer advisory reviews, greater autonomy, or a smaller context budget.
-A profile MUST NOT remove a capability that became mandatory through the kernel, risk floor, a Claim, Quality Impact, a MUST Human Check, or project policy.
-
-## Contract versioning
-
-Capability IDs are stable semantic names such as `review.security` or `verification.run`.
-Each capability carries an integer contract version.
-Providers declare the exact capability version they implement.
-Breaking changes create a new capability contract version instead of silently changing old provider expectations.
-
-Schemas use their own `schema_version` field because schema evolution and capability evolution are separate concerns.
-
-## Planned runtime flow
+## Runtime flow
 
 ```text
 request
-  -> classify objective + constraints + impacts
-  -> resolve host support
-  -> compile profile
-  -> validate capability/provider dependencies and conflicts
-  -> produce execution plan
-  -> execute only selected providers
-  -> record bounded run events and context metrics
-  -> collect exact evidence separately
-  -> evaluate assurance and release readiness
+  -> deterministic risk + explicit routing inputs
+  -> profile compiler
+  -> capability selection
+  -> provider resolution
+  -> inspectable execution plan
+  -> selected providers execute
+  -> bounded run events + evidence + Human Checks
+  -> Dashboard read model
 ```
 
-The execution plan records why each capability was selected or skipped so that composition is inspectable without replaying the original agent conversation.
+The Dashboard is not an orchestration dependency.
+If Dashboard telemetry fails, normal implementation should continue unless the underlying failed operation is itself a required assurance or verification capability.
 
-## Context rule
+## Self-describing Dashboard
 
-V4 treats context as a budgeted resource.
-The preferred reduction order is `avoid -> isolate -> summarize -> compact`.
-Full provider instructions are loaded on demand after selection.
-Raw child-agent and tool output should remain outside the parent context unless a capability contract explicitly requires it.
+Run:
 
-## Migration status
+```sh
+python3 scripts/ai/v4.py init
+python3 scripts/ai/v4.py dashboard
+```
 
-This initial increment is intentionally non-operative.
-The current V3 skills, policies, scripts, and CI remain the source of runtime behavior until later phases wrap them as providers, compare shadow plans, and switch execution only after evaluation.
+The Dashboard has three stable views.
+
+- **作業**: current project work, verification, recent changes, and Human Checks.
+- **仕組み**: Harness architecture, selected capabilities/providers, and machine-readable selection reasons.
+- **診断**: timeline, retries, fallbacks, context compaction, anomalies, and raw technical records.
+
+Explanations come from static self-description metadata and structured events.
+Normal Dashboard rendering does not invoke an LLM or consume the implementation agent's context.
+
+## Compatibility boundary
+
+Dashboard UI reads the V4 read model rather than internal files directly.
+Future V4-derived architectures can replace the adapter/compiler while preserving the human-facing model where the semantics remain compatible.
+
+Legacy V3 assets remain only where they act as V4 providers or durable project sources.
