@@ -61,6 +61,19 @@ required=(
   "scripts/ai/build-project-index"
   "scripts/ai/record-agent-event"
   "scripts/ai/validate-agent-trace"
+  "ai/v4/provider-registry.json"
+  "ai/v4/self-description.json"
+  "ai/schemas/run-event.schema.json"
+  "ai/schemas/provider-registry.schema.json"
+  "ai/schemas/project-dashboard.schema.json"
+  "ai/schemas/dashboard-read-model.schema.json"
+  "ai/templates/v4-dashboard.json"
+  "scripts/ai/v4.py"
+  "scripts/ai/lib/v4_core.py"
+  "scripts/ai/lib/v4_dashboard.py"
+  "scripts/ai/dashboard/index.html"
+  "scripts/ai/dashboard/styles.css"
+  "scripts/ai/dashboard/app.js"
 )
 
 fail=0
@@ -110,16 +123,20 @@ else
     scripts/ai/lib/assurance_core.py
     scripts/ai/lib/review_records.py
     scripts/ai/lib/agent_trace.py
+    scripts/ai/lib/v4_core.py
+    scripts/ai/lib/v4_dashboard.py
     scripts/ai/validate-assurance
     scripts/ai/record-evidence
     scripts/ai/build-project-index
     scripts/ai/record-agent-event
     scripts/ai/validate-agent-trace
+    scripts/ai/v4.py
     scripts/ai/tests/test_assurance.py
     scripts/ai/tests/test_classify_risk.py
     scripts/ai/tests/test_review_records.py
     scripts/ai/tests/test_agent_trace.py
     scripts/ai/tests/test_project_index.py
+    scripts/ai/tests/test_v4_runtime.py
   )
   if ! python3 -m py_compile "${python_files[@]}"; then
     echo "FAIL Python syntax/compile check"
@@ -133,6 +150,21 @@ else
     ai/schemas/review-record.schema.json
     ai/schemas/agent-event.schema.json
     ai/schemas/project-index.schema.json
+    ai/schemas/capability.schema.json
+    ai/schemas/plugin-manifest.schema.json
+    ai/schemas/profile.schema.json
+    ai/schemas/execution-plan.schema.json
+    ai/schemas/run-event.schema.json
+    ai/schemas/provider-registry.schema.json
+    ai/schemas/project-dashboard.schema.json
+    ai/schemas/dashboard-read-model.schema.json
+    ai/v4/provider-registry.json
+    ai/v4/self-description.json
+    ai/templates/v4-dashboard.json
+    ai/v4/profiles/rapid.json
+    ai/v4/profiles/balanced.json
+    ai/v4/profiles/understanding.json
+    ai/v4/profiles/high-assurance.json
     ai/templates/assurance/manifest.json
     ai/templates/assurance/human-checks.json
     ai/templates/review-record.json
