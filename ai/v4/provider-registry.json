@@ -1,0 +1,1240 @@
+{
+  "schema_version": "1.0",
+  "providers": [
+    {
+      "schema_version": "1.0",
+      "id": "runtime.profile-resolver",
+      "version": "1.0.0",
+      "description": "Compile objectives and constraints into an inspectable execution plan.",
+      "implements": {
+        "capability": "profile.resolve",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "none",
+        "model_calls": "none",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "runtime",
+        "entrypoint": "scripts/ai/v4.py plan"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "script.risk-floor",
+      "version": "1.0.0",
+      "description": "Calculate the deterministic minimum risk classification.",
+      "implements": {
+        "capability": "risk.floor",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": true,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "none",
+        "model_calls": "none",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/classify-risk"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "runtime.context-selector",
+      "version": "1.0.0",
+      "description": "Select bounded authoritative project context using existing routing sources.",
+      "implements": {
+        "capability": "context.select",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "fallback",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "none",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "runtime",
+        "entrypoint": "ai/context-map.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "host.project-explorer",
+      "version": "1.0.0",
+      "description": "Explore relevant project files and return bounded structured findings.",
+      "implements": {
+        "capability": "project.explore",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "fallback",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "host-native",
+        "entrypoint": "repository read/search"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.quality-preflight",
+      "version": "1.0.0",
+      "description": "Detect material specification and quality gaps.",
+      "implements": {
+        "capability": "quality.preflight",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/spec-gap-preflight/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.change-implement",
+      "version": "1.0.0",
+      "description": "Implement requested repository changes under the compiled V4 plan.",
+      "implements": {
+        "capability": "change.implement",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read-write",
+        "shell": true,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "high",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "none",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/develop-feature/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.debug-diagnose",
+      "version": "1.0.0",
+      "description": "Diagnose failures using discriminating observations.",
+      "implements": {
+        "capability": "debug.diagnose",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/debug-systematically/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "script.verification-run",
+      "version": "1.0.0",
+      "description": "Run deterministic project or harness gates and produce exact-run evidence.",
+      "implements": {
+        "capability": "verification.run",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "write-scoped",
+        "shell": true,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "none",
+        "model_calls": "none",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "machine-evidence",
+        "decisive": true
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/verify"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.review-verification",
+      "version": "1.0.0",
+      "description": "Independently review whether implementation and evidence support the requested outcome.",
+      "implements": {
+        "capability": "review.verification",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/verify-work/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.review-code",
+      "version": "1.0.0",
+      "description": "Review correctness and maintainability risks.",
+      "implements": {
+        "capability": "review.code",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/review-code/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.review-security",
+      "version": "1.0.0",
+      "description": "Review security-relevant behavior.",
+      "implements": {
+        "capability": "review.security",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/review-security/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.review-ux",
+      "version": "1.0.0",
+      "description": "Review interaction and usability risks.",
+      "implements": {
+        "capability": "review.ux",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/review-ux/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.review-design",
+      "version": "1.0.0",
+      "description": "Review visual and product-design consistency.",
+      "implements": {
+        "capability": "review.design",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/review-design/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "script.assurance-evaluate",
+      "version": "1.0.0",
+      "description": "Evaluate Claim, Evidence, review, and Human Check readiness.",
+      "implements": {
+        "capability": "assurance.evaluate",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "none",
+        "model_calls": "none",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": true
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/validate-assurance"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.human-approval",
+      "version": "1.0.0",
+      "description": "Prepare a bounded human decision packet when a genuine decision remains.",
+      "implements": {
+        "capability": "human.approval.prepare",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "medium"
+      },
+      "evidence": {
+        "produces": "decision-support",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/prepare-approval/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.release-evaluate",
+      "version": "1.0.0",
+      "description": "Evaluate release readiness while preserving V4 constraints.",
+      "implements": {
+        "capability": "release.evaluate",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "low",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/release-change/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.explain-change",
+      "version": "1.0.0",
+      "description": "Create durable evidence-grounded change knowledge.",
+      "implements": {
+        "capability": "knowledge.explain-change",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "knowledge",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/explain-change/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.explain-system",
+      "version": "1.0.0",
+      "description": "Explain the current system at a requested zoom level.",
+      "implements": {
+        "capability": "knowledge.explain-system",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "knowledge",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/explain-system/SKILL.md"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "skill.legibility",
+      "version": "1.0.0",
+      "description": "Perform the fresh-context AI Absence Test.",
+      "implements": {
+        "capability": "knowledge.legibility",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 1200,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "VERIFIED_ARTIFACT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "advisory",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "medium",
+        "model_calls": "medium",
+        "wall_time": "medium",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "ai-review",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "skill",
+        "entrypoint": ".agents/skills/review-legibility/SKILL.md"
+      }
+    }
+  ]
+}
