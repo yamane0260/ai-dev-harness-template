@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from lib.v4_core import build_read_model, compile_plan, emit_event, initialize_project, save_plan
+from lib.v4_core import build_read_model, compile_plan, completion_blockers, emit_event, initialize_project, save_plan
 
 class V4RuntimeTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -131,6 +131,23 @@ class V4RuntimeTests(unittest.TestCase):
         self.assertEqual(model["work"]["verification"]["state"],"success")
         self.assertEqual(model["diagnosis"]["human_check_count"],1)
         self.assertGreaterEqual(model["diagnosis"]["event_count"],3)
+
+
+    def test_completion_requires_verification(self) -> None:
+        run_id="run_finish"
+        plan=compile_plan(self.root,risk="GREEN",task_kind="implement")
+        save_plan(self.root,run_id,plan)
+        emit_event(
+            self.root,run_id=run_id,event_type="run.started",status="running",
+            component="profile.resolve",details={"summary":"開始"}
+        )
+        blockers=completion_blockers(self.root,run_id)
+        self.assertIn("required deterministic verification has not passed",blockers)
+        emit_event(
+            self.root,run_id=run_id,event_type="verification.completed",status="success",
+            component="verification.run",details={"summary":"成功"}
+        )
+        self.assertEqual(completion_blockers(self.root,run_id),[])
 
 if __name__ == "__main__":
     unittest.main()
