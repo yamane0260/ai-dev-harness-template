@@ -4,14 +4,17 @@ Executable source lives here. Run commands from the repository root.
 
 | Command | Purpose | Writes |
 |---|---|---|
-| `self-test` | Validate required harness files, scripts, fixtures, and core behavior | Temporary files only |
-| `classify-risk` | Calculate a deterministic risk floor from committed + working-tree change | Nothing |
-| `verify` | Run risk gates and record exact-run evidence/readiness | `.ai-artifacts/verification/` |
-| `validate-assurance` | Validate Claim relationships, structured review records, and optionally current readiness | Optional requested JSON output |
-| `record-evidence` | Internal conversion from gate records to hashed evidence | Requested artifact path |
-| `build-project-index` | Derive document/Claim/Evidence/Human Check graph | `.ai-artifacts/index/` by default |
-| `record-agent-event` | Adapter for one sanitized host/tool event | `.ai-artifacts/traces/` by default |
-| `validate-agent-trace` | Validate events and optionally create a compact coverage summary | Optional requested summary |
-| `validate-approval` | Validate No-Guess Approval packet structure | Nothing |
+| `python3 scripts/ai/v4.py init` | Initialize project-local V4 Dashboard config | `.harness/dashboard.json` |
+| `python3 scripts/ai/v4.py plan` | Compile a V4 execution plan and start a run ledger | `.ai-artifacts/runs/` |
+| `python3 scripts/ai/v4.py event` | Append one sanitized V4 runtime event | `.ai-artifacts/runs/` |
+| `python3 scripts/ai/v4.py state --write` | Build the project Dashboard read model | `.ai-artifacts/dashboard/` |
+| `python3 scripts/ai/v4.py dashboard` | Serve the project-local self-describing Dashboard | generated state only |
+| `self-test` | Validate required harness files, V4 runtime, fixtures, and core behavior | temporary files only |
+| `classify-risk` | Calculate the deterministic risk floor | nothing |
+| `verify` | Run deterministic gates and record exact-run evidence/readiness | `.ai-artifacts/verification/` |
+| `validate-assurance` | Validate Claim relationships and readiness | optional requested JSON |
+| `build-project-index` | Derive document/Claim/Evidence/Human Check relationships | `.ai-artifacts/index/` |
+| `record-agent-event` | Record sanitized host/tool audit metadata | `.ai-artifacts/traces/` |
 
-`lib/review_records.py` enforces the `ai-review-record` contract and binds a review to the supplied verification evidence. `lib/` otherwise contains internal standard-library Python code. `tests/` holds deterministic regression tests. Raw command output is generated evidence, not maintained documentation; do not commit it.
+V4 reuses deterministic V3-era implementations where they remain valid providers.
+Raw command output stays outside normal model context and durable human documentation.
