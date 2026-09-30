@@ -1,9 +1,10 @@
 # V3 to V4 File Migration Map
 
-This map assigns current V3 files and responsibilities to their V4 destination.
-It is intentionally file-oriented so that later migration work can be reviewed as a sequence of bounded moves instead of a broad rewrite.
+This document is retained as the historical cutover map from V3 to V4.
+V4 is now the authoritative composition model.
 
-The current V3 runtime remains authoritative until the relevant migration phase is completed and verified.
+Items marked WRAP or KEEP may still exist because their implementations remain useful V4 providers.
+The former V3 fixed routing/orchestration role is retired even when the underlying script, policy, or Skill remains.
 
 ## Status vocabulary
 
@@ -195,7 +196,7 @@ Raw artifacts remain separate from normal model context and durable documentatio
 
 ## Proposed migration sequence by file impact
 
-### Phase A: contract-only, no runtime behavior change
+### Phase A: contract-only (completed)
 
 Add:
 
@@ -208,7 +209,7 @@ Add:
 
 Update only indexes/README pointers.
 
-### Phase B: schema validation and wrappers
+### Phase B: schema validation and wrappers (completed/continuing provider hardening)
 
 Modify:
 
@@ -218,7 +219,7 @@ Modify:
 
 Do not switch normal development routing yet.
 
-### Phase C: shadow composition
+### Phase C: composition compiler (completed without retaining shadow routing)
 
 Add:
 
@@ -230,19 +231,19 @@ Add:
 
 Modify `develop-feature` only enough to generate and report the shadow plan while V3 still executes.
 
-### Phase D: runtime cutover
+### Phase D: runtime cutover (completed)
 
 Turn `develop-feature` into a thin adapter that executes the validated plan.
 Add run ledger and context metrics.
 Keep legacy V3 routing available behind an explicit compatibility path during evaluation.
 
-### Phase E: context and provider decomposition
+### Phase E: context and provider decomposition (ongoing)
 
 Move provider instructions behind progressive disclosure.
 Introduce structured child outputs and bounded parent-context budgets.
 Split `scripts/ai/verify` only after its current behavior is covered by contract tests.
 
-### Phase F: removal
+### Phase F: legacy routing removal (completed for authoritative entrypoints; provider cleanup ongoing)
 
 Remove:
 
