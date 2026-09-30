@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "project_id": "replace-with-project-id",
+  "name": "Replace with project name",
+  "locale": "ja",
+  "profile": "balanced",
+  "dashboard": {
+    "show_project_specific": true,
+    "technical_details_default_open": false
+  }
+}
