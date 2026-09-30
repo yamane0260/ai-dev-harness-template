@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/run-event.schema.json",
+  "title": "AI Dev Harness V4 Run Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "timestamp",
+    "project_id",
+    "run_id",
+    "type",
+    "status",
+    "details",
+    "redaction"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[a-f0-9]{32}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "type": {
+      "type": "string",
+      "minLength": 3
+    },
+    "component": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "running",
+        "success",
+        "failure",
+        "blocked",
+        "skipped",
+        "unknown"
+      ]
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+    },
+    "details": {
+      "type": "object"
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "raw_prompt",
+        "raw_completion",
+        "secrets"
+      ],
+      "properties": {
+        "raw_prompt": {
+          "const": false
+        },
+        "raw_completion": {
+          "const": false
+        },
+        "secrets": {
+          "const": false
+        }
+      }
+    }
+  }
+}
