@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/provider-registry.schema.json",
+  "title": "AI Dev Harness V4 Provider Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "providers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "plugin-manifest.schema.json"
+      },
+      "minItems": 1
+    }
+  }
+}
