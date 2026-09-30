@@ -1,33 +1,35 @@
 ---
 name: develop-feature
-description: Implement product features and behavior changes with context-efficient routing, a targeted Quality Envelope, Claim-based assurance, and proportional human-legibility records. Use for normal software changes that need the smallest relevant context, observable criteria, missing-quality detection, verification, explicit human checks, and durable understanding without approval ceremony.
+description: Implement product features and behavior changes through the V4 execution-plan runtime. Use for normal software changes that need bounded context, selected capabilities/providers, deterministic verification, explicit Human Checks, and proportional durable understanding.
 ---
 
 # Develop Feature
 
-1. Classify **work mode**: MICRO, STANDARD, or CRITICAL. Separately obtain the risk floor with `./scripts/ai/classify-risk` when a diff exists; raise risk only for actual consequences/unknowns.
-2. Build a compact Task Packet. Read `ai/context-map.md`; load only docs/code needed for the touched area.
-3. Apply `ai/quality-envelope.md`. Run `spec-gap-preflight` only when its triggers apply; record material Quality Impact domains and concise positive + negative/invariant criteria.
-4. For STANDARD/CRITICAL or YELLOW/RED work, create an active assurance record from `ai/templates/assurance/`. Map requirements to observable Claims, required deterministic gates, any non-decisive AI review, explicit Human Checks, affected paths/components, and residual uncertainty. MICRO/GREEN/LOW changes may remain an inline Change Record when no material assurance mapping is useful.
-5. For user-facing UI, classify UI Impact. STRUCTURAL changes require a compact UX Contract before implementation; use existing product/platform patterns before inventing interaction patterns.
-6. For STANDARD/CRITICAL, delegate broad read-only exploration when supported and keep raw results out of the main context.
-7. Implement the smallest change using existing patterns. During work, record only non-reconstructable decisions, constraints, invariants, rejected material alternatives, and Claim relationships; do not produce long narration.
-8. Add/update focused tests/checks that prove requested behavior and material invariants/failure behavior.
-9. Apply `ai/policies/human-legibility.md` and record completed Human Checks after the implementation is stable and before final exact-revision verification. Classify Knowledge Impact independently:
-   - NONE: no extra record.
-   - LOW: short inline Change Record only.
-   - MATERIAL/CRITICAL: use `explain-change` to create an evidence-grounded Change Brief; update canonical concept/decision/runbook only if warranted.
-10. Run `./scripts/ai/verify --risk <level> --assurance <manifest>` on the stable tracked state when an assurance record exists. Invoke security/UX/design/code review only when its trigger applies. An AI review artifact is `AI_REVIEWED`, not `MACHINE_VERIFIED`.
-11. Use `review-assurance` for STANDARD/CRITICAL assurance records after evidence exists. Every MUST Claim must be supported or explicitly routed to a completed MUST Human Check before release.
-12. For MATERIAL/CRITICAL, run `review-legibility` in a fresh context when supported. A CRITICAL blocking readiness gap prevents release. Do not give the reviewer the original implementation transcript. If assurance or legibility review changes a tracked file, repeat exact-revision verification and structured review.
-13. Invoke `prepare-approval` only when a non-automatable human decision remains. Knowledge/readiness documentation is not itself an approval trigger.
+1. Inspect the request and only the minimum repository metadata needed to identify task kind, material Quality Impact, Knowledge Impact, release intent, and any known blocking constraint.
+2. Compile a V4 execution plan before broad implementation work:
+   ```sh
+   python3 scripts/ai/v4.py plan --task implement [routing options]
+   ```
+   Use `--quality <domain>` only for material domains and `--knowledge-impact` independently. Do not lower the deterministic risk floor.
+3. Read the generated plan under `.ai-artifacts/runs/<run-id>/plan.json`. Treat selected capabilities as the active workflow. Do not load or invoke unselected provider instructions merely because they exist.
+4. Load bounded project context through `ai/context-map.md` and the selected capability needs. Broad exploration should be isolated when supported; return structured findings instead of raw transcripts.
+5. Apply selected planning/review capabilities before implementation when their contract requires preflight work. Preserve blocking unknowns rather than guessing.
+6. Implement the smallest change that satisfies the request and compiled constraints. Record only non-reconstructable decisions, invariants, material alternatives, and Claim relationships.
+7. Add focused tests or checks for requested behavior and material negative/invariant behavior.
+8. Run selected deterministic verification on the stable tracked state. Use existing `scripts/ai/verify`, evidence, and assurance tooling as the V4 providers named by the execution plan.
+9. Run only selected independent review capabilities. AI review remains non-decisive unless paired with the required machine evidence.
+10. Handle Knowledge Impact proportionally. MATERIAL/CRITICAL changes create durable evidence-grounded knowledge when selected by the plan. Perform the fresh-context legibility check only when selected.
+11. Leave explicit Human Checks only for observations or judgments automation cannot establish.
+12. Emit bounded V4 events for material stages when the host/wrapper can do so. Never include raw prompts, raw completions, secrets, credentials, or large command output.
+13. Rebuild the Dashboard read model after the run when needed:
+   ```sh
+   python3 scripts/ai/v4.py state --write
+   ```
 
-Return a concise completion summary: outcome, material Quality Impact, verification/evidence path, assurance readiness, Knowledge Impact + one-sentence knowledge delta + record path if any, residual uncertainty/readiness gaps, and exact Human Checks still required.
+Return a compact completion summary containing outcome, verification/evidence path, remaining Human Checks, residual uncertainty, and durable knowledge path when applicable.
 
-## Mutual verification
+## Runtime boundary
 
-Read `ai/policies/mutual-verification.md` when applying this workflow.
-Preserve and investigate material disagreements from either humans or agents.
-Correction is not restricted to explanation: requirements, implementation and
-test expectations remain revisable.
-Required review results use the structured review-record contract.
+The Dashboard is observational.
+Do not spend implementation-agent context generating Dashboard explanations.
+Self-description comes from `ai/v4/self-description.json` and structured events.
