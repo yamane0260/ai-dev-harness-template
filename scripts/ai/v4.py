@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import uuid
 import webbrowser
@@ -12,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.v4_core import (
     build_read_model, compile_plan, emit_event, find_repo_root, initialize_project,
-    save_plan, write_read_model,
+    load_plan, save_plan, write_read_model,
 )
 
 def print_json(data: object) -> None:
@@ -44,6 +45,16 @@ def main() -> int:
     event.add_argument("--reason-code")
     event.add_argument("--summary")
     event.add_argument("--details-json")
+
+    verify = sub.add_parser("verify", help="run deterministic verification and record V4 events")
+    verify.add_argument("--run-id", required=True)
+    verify.add_argument("--assurance")
+    verify.add_argument("--release", action="store_true")
+    verify.add_argument("--base")
+
+    finish = sub.add_parser("finish", help="mark a V4 run complete after required work is satisfied")
+    finish.add_argument("--run-id", required=True)
+    finish.add_argument("--summary", default="作業を完了しました")
 
     state = sub.add_parser("state", help="build dashboard read model")
     state.add_argument("--run-id")
@@ -93,6 +104,45 @@ def main() -> int:
         item = emit_event(
             root, run_id=args.run_id, event_type=args.type, status=args.status,
             component=args.component, reason_code=args.reason_code, details=details,
+        )
+        write_read_model(root, args.run_id)
+        print_json(item)
+        return 0
+
+    if args.command == "verify":
+        plan_data = load_plan(root, args.run_id)
+        if not plan_data:
+            raise ValueError(f"no V4 plan found for {args.run_id}")
+        risk = str(plan_data["risk"]["effective"]).lower()
+        command = [str(root / "scripts" / "ai" / "verify"), "--risk", risk]
+        if args.base:
+            command += ["--base", args.base]
+        if args.assurance:
+            command += ["--assurance", args.assurance]
+        if args.release:
+            command.append("--release")
+        if (root / "ai" / "TEMPLATE_MODE").is_file():
+            command.append("--harness")
+        emit_event(
+            root, run_id=args.run_id, event_type="verification.started", status="running",
+            component="verification.run", reason_code="AUTOMATED_TEST_AVAILABLE",
+            details={"summary": f"Verification started at {risk.upper()} risk"},
+        )
+        status = subprocess.run(command, cwd=root).returncode
+        emit_event(
+            root, run_id=args.run_id,
+            event_type="verification.completed" if status == 0 else "verification.failed",
+            status="success" if status == 0 else "failure",
+            component="verification.run",
+            details={"summary": "Deterministic verification passed" if status == 0 else f"Deterministic verification failed (exit {status})"},
+        )
+        write_read_model(root, args.run_id)
+        return status
+
+    if args.command == "finish":
+        item = emit_event(
+            root, run_id=args.run_id, event_type="run.completed", status="success",
+            details={"summary": args.summary},
         )
         write_read_model(root, args.run_id)
         print_json(item)
