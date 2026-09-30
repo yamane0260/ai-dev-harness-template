@@ -1,0 +1,369 @@
+{
+  "schema_version": "1.0",
+  "architecture": {
+    "nodes": [
+      {
+        "id": "request",
+        "kind": "input",
+        "label": {
+          "ja": "依頼",
+          "en": "Request"
+        }
+      },
+      {
+        "id": "profile.resolve",
+        "kind": "capability",
+        "label": {
+          "ja": "開発方針を決める",
+          "en": "Resolve profile"
+        }
+      },
+      {
+        "id": "project.explore",
+        "kind": "capability",
+        "label": {
+          "ja": "必要な場所を調べる",
+          "en": "Explore project"
+        }
+      },
+      {
+        "id": "change.implement",
+        "kind": "capability",
+        "label": {
+          "ja": "実装する",
+          "en": "Implement change"
+        }
+      },
+      {
+        "id": "verification.run",
+        "kind": "capability",
+        "label": {
+          "ja": "自動確認する",
+          "en": "Run verification"
+        }
+      },
+      {
+        "id": "assurance.evaluate",
+        "kind": "capability",
+        "label": {
+          "ja": "完了条件を確認する",
+          "en": "Evaluate assurance"
+        }
+      },
+      {
+        "id": "knowledge.explain-change",
+        "kind": "capability",
+        "label": {
+          "ja": "変更を理解できる形で残す",
+          "en": "Preserve change knowledge"
+        }
+      },
+      {
+        "id": "human_check",
+        "kind": "human",
+        "label": {
+          "ja": "人が確認する",
+          "en": "Human check"
+        }
+      },
+      {
+        "id": "complete",
+        "kind": "output",
+        "label": {
+          "ja": "完了",
+          "en": "Complete"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "request",
+        "to": "profile.resolve"
+      },
+      {
+        "from": "profile.resolve",
+        "to": "project.explore"
+      },
+      {
+        "from": "project.explore",
+        "to": "change.implement"
+      },
+      {
+        "from": "change.implement",
+        "to": "verification.run"
+      },
+      {
+        "from": "verification.run",
+        "to": "assurance.evaluate"
+      },
+      {
+        "from": "assurance.evaluate",
+        "to": "knowledge.explain-change"
+      },
+      {
+        "from": "assurance.evaluate",
+        "to": "human_check"
+      },
+      {
+        "from": "knowledge.explain-change",
+        "to": "complete"
+      },
+      {
+        "from": "human_check",
+        "to": "complete"
+      }
+    ]
+  },
+  "components": {
+    "profile.resolve": {
+      "kind": "capability",
+      "label": {
+        "ja": "開発方針を決める",
+        "en": "Resolve profile"
+      },
+      "technical_name": "Profile Resolver",
+      "summary": {
+        "ja": "目的、制約、リスク、利用可能な機能から今回の実行計画を作ります。",
+        "en": "Builds the execution plan from objectives, constraints, risk, and available providers."
+      },
+      "purpose": {
+        "ja": "速さや自律性を最適化しても、安全性や必須確認を弱めないための入口です。",
+        "en": "Optimizes objectives without weakening mandatory constraints."
+      }
+    },
+    "risk.floor": {
+      "kind": "capability",
+      "label": {
+        "ja": "最低リスクを決める",
+        "en": "Risk floor"
+      },
+      "technical_name": "Risk Floor",
+      "summary": {
+        "ja": "変更内容から下げてはいけない最低リスクを機械的に決めます。",
+        "en": "Calculates the deterministic minimum risk level."
+      }
+    },
+    "project.explore": {
+      "kind": "capability",
+      "label": {
+        "ja": "必要な場所を調べる",
+        "en": "Explore project"
+      },
+      "technical_name": "Project Explore Capability",
+      "summary": {
+        "ja": "関係するファイルやテストだけを調べ、不要な情報を親コンテキストへ持ち込みません。",
+        "en": "Finds relevant project material while keeping broad raw exploration isolated."
+      }
+    },
+    "quality.preflight": {
+      "kind": "capability",
+      "label": {
+        "ja": "見落としを事前確認する",
+        "en": "Quality preflight"
+      },
+      "technical_name": "Quality Preflight Capability",
+      "summary": {
+        "ja": "仕様どおりでも問題になる品質条件が抜けていないかを確認します。",
+        "en": "Checks for material quality constraints missing from the functional request."
+      }
+    },
+    "change.implement": {
+      "kind": "capability",
+      "label": {
+        "ja": "実装する",
+        "en": "Implement change"
+      },
+      "technical_name": "Change Implement Capability",
+      "summary": {
+        "ja": "実行計画と制約に従って必要な変更を実装します。",
+        "en": "Implements the requested change under the compiled constraints."
+      }
+    },
+    "verification.run": {
+      "kind": "capability",
+      "label": {
+        "ja": "自動確認する",
+        "en": "Run verification"
+      },
+      "technical_name": "Verification Capability",
+      "summary": {
+        "ja": "実装した処理自身の判断だけに頼らず、テストなど別の方法で結果を確かめます。",
+        "en": "Checks results with deterministic evidence rather than the implementer's own judgment."
+      }
+    },
+    "assurance.evaluate": {
+      "kind": "capability",
+      "label": {
+        "ja": "完了条件を確認する",
+        "en": "Evaluate assurance"
+      },
+      "technical_name": "Assurance Evaluate Capability",
+      "summary": {
+        "ja": "必要な証拠と人の確認がそろっているかを構造化データから判定します。",
+        "en": "Evaluates whether required evidence and human checks are satisfied."
+      }
+    },
+    "knowledge.explain-change": {
+      "kind": "capability",
+      "label": {
+        "ja": "変更を理解できる形で残す",
+        "en": "Explain change"
+      },
+      "technical_name": "Knowledge Explain Change Capability",
+      "summary": {
+        "ja": "元のAI会話がなくても将来の担当者が変更を理解できる情報を残します。",
+        "en": "Leaves durable knowledge so maintainers do not need the original AI conversation."
+      }
+    },
+    "knowledge.legibility": {
+      "kind": "capability",
+      "label": {
+        "ja": "引き継げるか確認する",
+        "en": "Legibility review"
+      },
+      "technical_name": "Knowledge Legibility Capability",
+      "summary": {
+        "ja": "元の会話を見ずに、別の担当者が変更を理解し運用できるか確認します。",
+        "en": "Checks whether a fresh maintainer can understand and operate the change."
+      }
+    },
+    "review.security": {
+      "kind": "capability",
+      "label": {
+        "ja": "安全性を確認する",
+        "en": "Security review"
+      },
+      "technical_name": "Security Review Capability",
+      "summary": {
+        "ja": "認証、権限、機密情報などに関わる変更を重点的に確認します。",
+        "en": "Reviews security-relevant behavior."
+      }
+    },
+    "review.ux": {
+      "kind": "capability",
+      "label": {
+        "ja": "操作性を確認する",
+        "en": "UX review"
+      },
+      "technical_name": "UX Review Capability",
+      "summary": {
+        "ja": "操作の分かりやすさ、状態遷移、エラー時の扱いを確認します。",
+        "en": "Reviews interaction, discoverability, and error handling."
+      }
+    },
+    "review.design": {
+      "kind": "capability",
+      "label": {
+        "ja": "見た目の整合性を確認する",
+        "en": "Design review"
+      },
+      "technical_name": "Design Review Capability",
+      "summary": {
+        "ja": "視覚表現やデザイン上の一貫性を確認します。",
+        "en": "Reviews visual and product-design consistency."
+      }
+    },
+    "review.code": {
+      "kind": "capability",
+      "label": {
+        "ja": "コードを独立確認する",
+        "en": "Code review"
+      },
+      "technical_name": "Code Review Capability",
+      "summary": {
+        "ja": "実装担当とは別の視点から正しさや保守性を確認します。",
+        "en": "Independently reviews correctness and maintainability risks."
+      }
+    },
+    "debug.diagnose": {
+      "kind": "capability",
+      "label": {
+        "ja": "原因を切り分ける",
+        "en": "Diagnose failure"
+      },
+      "technical_name": "Debug Diagnose Capability",
+      "summary": {
+        "ja": "観測結果を使って原因候補を切り分け、次に試すことを決めます。",
+        "en": "Uses discriminating observations to narrow failure causes."
+      }
+    },
+    "release.evaluate": {
+      "kind": "capability",
+      "label": {
+        "ja": "リリース可能か確認する",
+        "en": "Evaluate release"
+      },
+      "technical_name": "Release Evaluate Capability",
+      "summary": {
+        "ja": "必要な確認がすべて満たされているかを確認します。",
+        "en": "Evaluates scoped release readiness."
+      }
+    },
+    "human.approval.prepare": {
+      "kind": "capability",
+      "label": {
+        "ja": "人の判断材料を準備する",
+        "en": "Prepare human decision"
+      },
+      "technical_name": "Human Approval Prepare Capability",
+      "summary": {
+        "ja": "技術検証では決められない選択だけを、人が判断できる形にまとめます。",
+        "en": "Prepares bounded decision support for genuinely non-automatable choices."
+      }
+    },
+    "knowledge.explain-system": {
+      "kind": "capability",
+      "label": {
+        "ja": "仕組みを説明する",
+        "en": "Explain system"
+      },
+      "technical_name": "Knowledge Explain System Capability",
+      "summary": {
+        "ja": "必要な範囲だけを読み込み、現在のシステム構造を説明します。",
+        "en": "Explains the current system at the requested zoom level."
+      }
+    }
+  },
+  "reason_codes": {
+    "PLAN_COMPILED": {
+      "ja": "実行計画を正常に作成しました。",
+      "en": "The execution plan was compiled successfully."
+    },
+    "PLAN_INVALID": {
+      "ja": "必要な機能を満たす構成を作れませんでした。",
+      "en": "A valid composition could not be built."
+    },
+    "PROFILE_SELECTED": {
+      "ja": "プロジェクト設定または指定された方針が選択されました。",
+      "en": "The configured or requested profile was selected."
+    },
+    "CAPABILITY_SELECTED": {
+      "ja": "今回の目的や制約に必要なため選択されました。",
+      "en": "Selected because the current intent or constraints require it."
+    },
+    "PROVIDER_SELECTED": {
+      "ja": "必要な機能を提供でき、現在の実行環境で利用できるため選択されました。",
+      "en": "Selected as a compatible provider for the required capability."
+    },
+    "AUTOMATED_TEST_AVAILABLE": {
+      "ja": "このプロジェクトでは自動テストを利用できるため選択されました。",
+      "en": "Automated tests are available for this project."
+    },
+    "RISK_LEVEL_HIGH": {
+      "ja": "変更のリスクが高いため追加の確認が必要です。",
+      "en": "Additional verification is required by the risk level."
+    },
+    "PRIMARY_PROVIDER_FAILED": {
+      "ja": "最初に選んだ実装方法が失敗したため、明示された代替へ切り替えました。",
+      "en": "The primary provider failed and an explicit fallback was used."
+    },
+    "HUMAN_VALIDATION_REQUIRED": {
+      "ja": "自動化だけでは確認できない項目が残っています。",
+      "en": "A required observation cannot be established automatically."
+    },
+    "CONTEXT_PRESSURE_HIGH": {
+      "ja": "親コンテキストの使用量を抑えるため情報整理が行われました。",
+      "en": "Context was compacted to stay within the parent budget."
+    }
+  }
+}
