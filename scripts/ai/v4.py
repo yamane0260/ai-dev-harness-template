@@ -12,8 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.v4_core import (
-    build_read_model, compile_plan, emit_event, find_repo_root, initialize_project,
-    load_plan, save_plan, write_read_model,
+    build_read_model, compile_plan, completion_blockers, emit_event, find_repo_root,
+    initialize_project, load_plan, save_plan, write_read_model,
 )
 
 def print_json(data: object) -> None:
@@ -140,6 +140,10 @@ def main() -> int:
         return status
 
     if args.command == "finish":
+        blockers = completion_blockers(root, args.run_id)
+        if blockers:
+            print_json({"run_id": args.run_id, "completed": False, "blockers": blockers})
+            return 2
         item = emit_event(
             root, run_id=args.run_id, event_type="run.completed", status="success",
             details={"summary": args.summary},
