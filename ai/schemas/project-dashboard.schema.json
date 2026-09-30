@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/project-dashboard.schema.json",
+  "title": "AI Dev Harness V4 Project Dashboard Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "name",
+    "locale",
+    "profile"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locale": {
+      "enum": [
+        "ja",
+        "en"
+      ]
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "dashboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show_project_specific": {
+          "type": "boolean"
+        },
+        "technical_details_default_open": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
