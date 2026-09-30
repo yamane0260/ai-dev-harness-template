@@ -16,7 +16,9 @@
     "cost"
   ],
   "properties": {
-    "schema_version": { "const": "1.0" },
+    "schema_version": {
+      "const": "1.0"
+    },
     "id": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9][a-z0-9-]*)+$"
@@ -25,11 +27,16 @@
       "type": "string",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
     },
-    "description": { "type": "string" },
+    "description": {
+      "type": "string"
+    },
     "implements": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["capability", "contract_version"],
+      "required": [
+        "capability",
+        "contract_version"
+      ],
       "properties": {
         "capability": {
           "type": "string",
@@ -43,13 +50,18 @@
     },
     "requires": {
       "type": "array",
-      "items": { "$ref": "#/$defs/capabilityRef" },
+      "items": {
+        "$ref": "#/$defs/capabilityRef"
+      },
       "uniqueItems": true,
       "default": []
     },
     "conflicts": {
       "type": "array",
-      "items": { "type": "string", "minLength": 1 },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
       "uniqueItems": true,
       "default": []
     },
@@ -59,12 +71,18 @@
       "properties": {
         "before": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         },
         "after": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         }
       }
@@ -83,14 +101,31 @@
       ],
       "properties": {
         "filesystem": {
-          "enum": ["none", "read", "write-scoped", "read-write"]
+          "enum": [
+            "none",
+            "read",
+            "write-scoped",
+            "read-write"
+          ]
         },
-        "shell": { "type": "boolean" },
-        "network": { "type": "boolean" },
-        "credentials": { "type": "boolean" },
-        "git_push": { "type": "boolean" },
-        "deployment": { "type": "boolean" },
-        "external_side_effects": { "type": "boolean" }
+        "shell": {
+          "type": "boolean"
+        },
+        "network": {
+          "type": "boolean"
+        },
+        "credentials": {
+          "type": "boolean"
+        },
+        "git_push": {
+          "type": "boolean"
+        },
+        "deployment": {
+          "type": "boolean"
+        },
+        "external_side_effects": {
+          "type": "boolean"
+        }
       }
     },
     "host": {
@@ -99,18 +134,30 @@
       "properties": {
         "requires": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         },
         "prefers": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         },
         "supported_hosts": {
           "type": "array",
           "items": {
-            "enum": ["codex", "claude-code", "cursor", "deepseek-harness", "generic"]
+            "enum": [
+              "codex",
+              "claude-code",
+              "cursor",
+              "deepseek-harness",
+              "generic"
+            ]
           },
           "uniqueItems": true
         }
@@ -128,16 +175,32 @@
       ],
       "properties": {
         "discovery": {
-          "enum": ["catalog-only", "metadata", "eager"]
+          "enum": [
+            "catalog-only",
+            "metadata",
+            "eager"
+          ]
         },
         "instructions": {
-          "enum": ["on-demand", "eager"]
+          "enum": [
+            "on-demand",
+            "eager"
+          ]
         },
         "raw_outputs": {
-          "enum": ["isolated", "artifact-only", "parent-visible"]
+          "enum": [
+            "isolated",
+            "artifact-only",
+            "parent-visible"
+          ]
         },
         "parent_output": {
-          "enum": ["structured", "summary", "reference-only", "full"]
+          "enum": [
+            "structured",
+            "summary",
+            "reference-only",
+            "full"
+          ]
         },
         "parent_budget_tokens": {
           "type": "integer",
@@ -162,14 +225,24 @@
     "failure": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode"],
+      "required": [
+        "mode"
+      ],
       "properties": {
         "mode": {
-          "enum": ["block", "fallback", "retry", "advisory"]
+          "enum": [
+            "block",
+            "fallback",
+            "retry",
+            "advisory"
+          ]
         },
         "fallback_providers": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         },
         "max_retries": {
@@ -185,24 +258,66 @@
     "lifecycle": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["state"],
+      "required": [
+        "state"
+      ],
       "properties": {
         "state": {
-          "enum": ["stateless", "temporary", "persistent"]
+          "enum": [
+            "stateless",
+            "temporary",
+            "persistent"
+          ]
         },
-        "teardown_required": { "type": "boolean" },
-        "teardown_description": { "type": "string" }
+        "teardown_required": {
+          "type": "boolean"
+        },
+        "teardown_description": {
+          "type": "string"
+        }
       }
     },
     "cost": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["context", "model_calls", "wall_time", "human_attention"],
+      "required": [
+        "context",
+        "model_calls",
+        "wall_time",
+        "human_attention"
+      ],
       "properties": {
-        "context": { "enum": ["none", "low", "medium", "high"] },
-        "model_calls": { "enum": ["none", "low", "medium", "high"] },
-        "wall_time": { "enum": ["low", "medium", "high"] },
-        "human_attention": { "enum": ["none", "low", "medium", "high"] }
+        "context": {
+          "enum": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "model_calls": {
+          "enum": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "wall_time": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "human_attention": {
+          "enum": [
+            "none",
+            "low",
+            "medium",
+            "high"
+          ]
+        }
       }
     },
     "evidence": {
@@ -221,7 +336,31 @@
             "routing"
           ]
         },
-        "decisive": { "type": "boolean" }
+        "decisive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "entrypoint"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "runtime",
+            "script",
+            "skill",
+            "host-native"
+          ]
+        },
+        "entrypoint": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     }
   },
@@ -229,7 +368,10 @@
     "capabilityRef": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["capability", "contract_version"],
+      "required": [
+        "capability",
+        "contract_version"
+      ],
       "properties": {
         "capability": {
           "type": "string",
