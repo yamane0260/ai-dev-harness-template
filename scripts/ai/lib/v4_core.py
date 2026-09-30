@@ -486,6 +486,26 @@ def build_read_model(root: Path, run_id: str | None = None) -> dict[str, Any]:
         "technical": {"events": events[-250:], "plan": plan},
     }
 
+def completion_blockers(root: Path, run_id: str) -> list[str]:
+    plan = load_plan(root, run_id)
+    if not plan:
+        return [f"no V4 plan found for {run_id}"]
+    blockers = list(plan.get("invalid_reasons", []))
+    model = build_read_model(root, run_id)
+
+    verification_required = any(
+        item.get("capability") == "verification.run" and item.get("required", True)
+        for item in plan.get("selected", [])
+    )
+    if verification_required and model["work"]["verification"].get("state") != "success":
+        blockers.append("required deterministic verification has not passed")
+
+    for item in model["work"].get("attention", []):
+        if item.get("status") not in {"success", "completed", "skipped"}:
+            blockers.append(f"human check remains incomplete: {item.get('summary', 'unspecified check')}")
+
+    return blockers
+
 def write_read_model(root: Path, run_id: str | None = None) -> Path:
     model = build_read_model(root, run_id)
     path = root / ".ai-artifacts" / "dashboard" / "state.json"
