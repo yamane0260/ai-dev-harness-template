@@ -1,68 +1,102 @@
-# AI Development Harness V3
+# AI Development Harness V4
 
-Optimize for correctness, real-world quality, context efficiency, and durable human responsibility transfer. A non-trivial change is complete only when its implementation, assurance state, required human checks, and durable knowledge are discoverable without the original AI session.
+Optimize for correctness, context efficiency, inspectable composition, durable human understanding, and explicit responsibility transfer.
+
+V4 is the authoritative runtime model. Existing V3 verification, assurance, review, and knowledge assets remain available as V4 providers where they preserve useful behavior.
 
 ## Start here
 
-- New/adopted repo: use `bootstrap-project`.
-- Product change: use `develop-feature` as the primary workflow skill.
-- Before non-trivial implementation, apply `ai/quality-envelope.md`; use `spec-gap-preflight` when triggered.
-- Read `ai/context-map.md` before loading project docs.
-- Human entry point: `PROJECT_MAP.md`.
-- Assurance policy: `ai/policies/assurance.md`; manifests live under `assurance/`.
-- Human understanding policy: `ai/policies/human-legibility.md`.
-- Deterministic checks live in `scripts/ai/`; project commands live in `ai/commands.conf`.
+- New/adopted repository: use `bootstrap-project`.
+- Product change: use `develop-feature`.
+- Human project view: run `python3 scripts/ai/v4.py dashboard`.
+- V4 contracts and architecture: `ai/v4/`.
+- Human repository map: `PROJECT_MAP.md`.
+- Deterministic verification: `scripts/ai/verify`.
+- Assurance state: `assurance/`.
 
-## Independent classifications
+## V4 composition rule
 
-- **Work mode** — MICRO / STANDARD / CRITICAL: controls context/orchestration.
-- **Risk** — GREEN / YELLOW / RED: controls evidence/release requirements.
-- **Quality Impact** — routes only relevant nonfunctional domains.
-- **Knowledge Impact** — NONE / LOW / MATERIAL / CRITICAL: controls durable human-understanding records.
+For non-trivial work, compile a V4 execution plan before implementation.
 
-Do not raise one classification merely because another is high; use its own definition.
+```sh
+python3 scripts/ai/v4.py plan --task implement
+```
+
+Add only the material routing inputs that actually apply, for example:
+
+```sh
+python3 scripts/ai/v4.py plan \
+  --task implement \
+  --quality security \
+  --knowledge-impact MATERIAL
+```
+
+The execution plan selects semantic capabilities first and concrete providers second.
+Load provider instructions only after selection.
+Do not mechanically run every available Skill.
+
+## Independent inputs
+
+Keep these inputs separate.
+
+- **Risk**: GREEN / YELLOW / RED. Deterministic minimum safety and evidence floor.
+- **Quality Impact**: only domains materially affected by the task.
+- **Knowledge Impact**: NONE / LOW / MATERIAL / CRITICAL.
+- **Profile**: optimization preferences such as rapid, balanced, understanding, or high-assurance.
+- **Human Understanding Requirement**: what the responsible maintainer must be able to understand.
+
+A profile may optimize speed, autonomy, explanation depth, or context use.
+It may not weaken a required risk, security, Claim, Evidence, Human Check, or release constraint.
 
 ## Context rules
 
 - Prefer one task per fresh top-level session.
-- Load only docs relevant to touched paths and material quality/knowledge impacts.
-- Delegate broad exploration before implementation when it would pollute the main context.
-- Keep raw logs, transcripts, screenshots, and large dumps out of the main context and durable human docs; persist evidence separately and return concise summaries/paths.
-- Record non-reconstructable facts and relationships during implementation; generate audience-appropriate prose only when it is needed.
-- Do not chain Skills mechanically. Specialist review/legibility Skills run only when triggered.
+- Use the execution plan and `ai/context-map.md` to load only relevant sources.
+- Keep broad exploration isolated when possible and return bounded structured results.
+- Keep raw logs, transcripts, screenshots, large tool output, and private reasoning outside parent context.
+- Load full provider instructions only for selected providers.
+- Preserve non-reconstructable decisions, invariants, and failure/recovery knowledge in durable project records.
 
 ## Hard rules
 
-- Never claim success without fresh verification evidence from the current revision.
-- Never use `AI_REVIEWED` as a synonym for `MACHINE_VERIFIED`.
-- A declared MUST Claim must have current evidence or an explicitly linked, completed human check. Unverified critical Claims block release.
-- A pending or failed MUST Human Check blocks release. Explanation familiarity never relaxes this rule.
-- Never weaken/delete/skip a failing check merely to get green status.
-- Never invent commands, dependencies, APIs, data, environment variables, product requirements, or historical rationale.
-- Functional-spec compliance is insufficient when a material Quality Envelope gap remains.
-- Add negative/invariant criteria where failure, cross-user behavior, duplicates/concurrency, compatibility, recovery, or resource limits matter.
-- For MATERIAL/CRITICAL Knowledge Impact, leave durable evidence that a fresh maintainer can understand the change without the original AI session.
-- Label material rationale `RECORDED`, `DERIVED`, or `INFERRED`; never present post-hoc inference as historical fact.
-- Human approval is for desired consequences/tradeoffs, not unfamiliar technology or documentation readiness alone.
-- If a blocking unknown or CRITICAL readiness gap remains, do not release.
-- Treat runtime agent traces as audit evidence, not as proof that the generated result is correct. Never fabricate host events when instrumentation is unavailable.
+- Never report successful completion without current-revision support.
+- Never silently omit or downgrade a required capability after provider failure.
+- Keep `AI_REVIEWED` distinct from `MACHINE_VERIFIED`.
+- A pending or failed MUST Human Check blocks readiness when that check is required.
+- Never weaken tests, requirements, or gates merely to obtain green status.
+- Never invent commands, dependencies, APIs, observations, requirements, or historical rationale.
+- Treat traces as action/audit evidence, not proof of product correctness.
+- Do not persist raw prompts, raw completions, secrets, credentials, or private reasoning in the V4 run ledger.
+- Human approval is reserved for decisions that technical verification cannot determine.
+
+## Runtime records
+
+V4 separates:
+
+- execution plan and provider selection;
+- append-only run events;
+- deterministic evidence;
+- structured reviews;
+- Human Checks;
+- durable project knowledge;
+- Dashboard read models.
+
+Dashboard data must be derived from structured runtime records.
+Dashboard rendering must not require an LLM.
 
 ## Commands
 
 ```sh
+python3 scripts/ai/v4.py init
+python3 scripts/ai/v4.py plan --task implement
+python3 scripts/ai/v4.py state --write
+python3 scripts/ai/v4.py dashboard
+
 ./scripts/ai/self-test
 ./scripts/ai/classify-risk
 ./scripts/ai/verify --risk green
-./scripts/ai/verify --risk yellow
-./scripts/ai/verify --risk red
 ./scripts/ai/validate-assurance --manifest assurance/current/<change>/manifest.json
-./scripts/ai/build-project-index
 ```
 
-## Mutual verification
-
-Apply `ai/policies/mutual-verification.md` during implementation, review,
-explanation and release.
-Do not assume either AI implementation or human criticism is correct.
-Route disagreements to requirements, implementation, tests or explanation using
-observations; do not default to documentation-only repair.
+Apply `ai/policies/mutual-verification.md` when humans and agents disagree materially.
+Resolve disagreements through requirements, implementation, tests, or observations rather than defaulting to documentation repair.
