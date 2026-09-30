@@ -6,41 +6,37 @@ This is the human entry point. Use it before browsing folders at random.
 
 | Question | Start here | Source-of-truth role |
 |---|---|---|
-| What this repository is and how to use it | `README.md` | Harness overview and normal workflow |
-| What the product must do | `docs/PRODUCT.md`, `docs/specs/` | Current requirements and acceptance criteria |
-| How the system is divided | `docs/ARCHITECTURE.md` | Current architecture and boundaries |
+| What this repository is and how to use it | `README.md`, `AGENTS.md` | V4 overview and runtime entry |
+| What the Harness is doing in this project | `python3 scripts/ai/v4.py dashboard` | Derived project-local human view |
+| How the V4 Harness is structured | Dashboard 「仕組み」, then `ai/v4/` | Self-description first, contracts second |
+| Why a Harness capability/provider was selected | Dashboard 「仕組み」 and current run plan | Structured selection reason |
+| Where Harness behavior looks inefficient or unstable | Dashboard 「診断」 | Run events, retry/fallback/context observations |
+| What the product must do | `docs/PRODUCT.md`, `docs/specs/` | Current requirements |
+| How the product system is divided | `docs/ARCHITECTURE.md` | Current product architecture |
 | Why a durable choice was made | `docs/decisions/` | Recorded decisions and tradeoffs |
-| What a project-specific concept means | `docs/concepts/` | Current reusable technical knowledge |
-| What changed recently | `assurance/current/`, then `docs/changes/` | Active assurance state, then historical explanation |
-| Why a change is considered ready | `assurance/` | Claims, evidence requirements, human checks, and uncertainty |
-| What a human still must test or decide | active `human-checks.json` files | MUST / SHOULD / OPTIONAL human work |
-| How to diagnose or recover | `docs/runbooks/`, `docs/RELIABILITY.md` | Current operational procedure |
-| What the AI actually executed | `.ai-artifacts/traces/` | Host-captured audit evidence; generated and not committed |
-| What verification actually ran | `.ai-artifacts/verification/` | Exact-revision commands, results, logs, and hashes |
-| What a required AI review checked | `.ai-artifacts/reviews/`, then `ai/policies/mutual-verification.md` | Exact-run structured review and its limits |
+| What changed recently | `assurance/current/`, then `docs/changes/` | Active assurance and historical explanation |
+| Why a change is considered ready | `assurance/` | Claims, evidence requirements, Human Checks, uncertainty |
+| What verification actually ran | `.ai-artifacts/verification/` | Exact-run deterministic evidence |
+| What Harness run events were recorded | `.ai-artifacts/runs/` | Bounded structured V4 runtime history |
+| What the host actually executed | `.ai-artifacts/traces/` | Sanitized host/tool audit metadata |
 
 ## Folder roles
 
-| Location | Contains | Read when | Authorship |
-|---|---|---|---|
-| `docs/` | Current knowledge and concise historical briefs | Understanding product, architecture, decisions, or recovery | Human/agent maintained |
-| `assurance/` | Human-facing trust boundary: Claims, evidence requirements, human checks | Deciding whether a change is understood and release-ready | Human/agent maintained, schema-validated |
-| `ai/` | Policies, schemas, templates, routing, evals; see `ai/README.md` | Changing or applying the harness | Human/agent maintained |
-| `.agents/skills/` | Portable task workflows; see `.agents/skills/README.md` | Running a defined development/review workflow | Human/agent maintained |
-| `scripts/ai/` | Deterministic validation and derived-index tools; see `scripts/ai/README.md` | Producing or checking evidence | Executable source |
-| `.ai-artifacts/` | Raw logs, exact-run evidence, traces, derived graph/index | Investigating a run or failure | Generated; never commit |
+| Location | Contains | Role |
+|---|---|---|
+| `docs/` | Product knowledge, decisions, runbooks, concise change records | Durable human/project authority |
+| `assurance/` | Claims, evidence requirements, Human Checks | Trust and readiness boundary |
+| `ai/v4/` | Active V4 capability/profile/provider/self-description sources | Harness composition authority |
+| `ai/` | Supporting policies, schemas, templates, routing sources | Harness and project contracts |
+| `.agents/skills/` | Provider implementations used only when selected | Agent workflow providers |
+| `scripts/ai/` | V4 runtime plus deterministic providers | Executable source |
+| `.harness/` | Project-local tracked Harness configuration | Project profile/Dashboard configuration |
+| `.ai-artifacts/` | Plans, events, Dashboard state, verification, traces, indexes | Generated and uncommitted |
 
 ## Trust model
 
-A green command, an AI review, a provenance record, and a human review answer different questions. Do not collapse them into one confidence score.
+A passing command, an AI review, a runtime trace, a human observation, and a durable explanation answer different questions.
+Do not collapse them into one confidence score.
 
-1. Requirements state the intended outcome.
-2. Claims state the property that must be true.
-3. Evidence requirements state how that property can be checked.
-4. Verification records what actually ran on an exact repository state.
-5. Structured AI reviews test expectations and counterexamples against that verification evidence; they remain non-decisive.
-6. Human checks isolate judgments or real-device observations that automation cannot establish.
-7. Durable docs preserve decisions, invariants, failure modes, and recovery knowledge.
-8. Agent traces show actions and control boundaries; they do not prove product correctness.
-
-Run `./scripts/ai/build-project-index` to derive a machine-readable relationship graph under `.ai-artifacts/index/`. The derived index is never the source of truth.
+Dashboard status is a projection of structured records.
+The underlying evidence and Human Checks remain authoritative for readiness.
