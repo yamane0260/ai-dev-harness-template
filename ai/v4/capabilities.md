@@ -910,3 +910,24 @@ The first profile compiler should implement conservative rules before attempting
 - Provider fallback must preserve the capability contract and required constraints.
 
 Future optimization may minimize context, model calls, wall time, or human attention among valid compositions, but correctness constraints take precedence.
+
+
+## Team compatibility capabilities (V4.1)
+
+### `collaboration.observe@1`
+
+Observe explicit repository guidance and bounded recent Git behavior without modifying the target repository. Output is routing/adaptation state, not correctness evidence. Required in Team Mode. Failure mode: `block`.
+
+### `collaboration.profile@1`
+
+Resolve observations into a Team Profile that records rule strength, confidence, evidence count, sources, and unknowns. Explicit/enforced rules remain separate from inferred conventions. Failure mode: `block`.
+
+### `collaboration.surface.adapt@1`
+
+Render branch names, commit messages, pull-request text, and collaboration comments in the team's established style while preserving the actual implementation and verification facts. This capability may change representation only.
+
+### `collaboration.surface.guard@1`
+
+Check a proposed team-visible surface immediately before publication. Block Harness-internal detail leakage and violations of explicit team requirements. Strongly inferred convention differences are advisory unless the team later makes them explicit.
+
+**Invariant:** Team conventions MUST NOT weaken verification, risk floors, security requirements, Claims/Evidence requirements, release policy, or required Human Checks. Explicit AI-use disclosure, sign-off, authorship, or other metadata requirements must not be hidden by adaptation.
