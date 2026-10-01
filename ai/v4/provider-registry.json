@@ -1235,6 +1235,280 @@
         "kind": "skill",
         "entrypoint": ".agents/skills/review-legibility/SKILL.md"
       }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "runtime.team-convention-observer",
+      "version": "1.0.0",
+      "description": "Observe explicit repository guidance and bounded Git history into external sidecar state.",
+      "implements": {
+        "capability": "collaboration.observe",
+        "contract_version": 1
+      },
+      "requires": [],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": true,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "persistent",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "none",
+        "wall_time": "low",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/team-compat.py --repo <repo> observe"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "runtime.team-profile-resolver",
+      "version": "1.0.0",
+      "description": "Resolve observed collaboration behavior into a structured Team Profile.",
+      "implements": {
+        "capability": "collaboration.profile",
+        "contract_version": 1
+      },
+      "requires": [
+        {
+          "capability": "collaboration.observe",
+          "contract_version": 1,
+          "required": true
+        }
+      ],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "none",
+        "wall_time": "low",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/team-compat.py --repo <repo> observe"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "host.team-surface-adapter",
+      "version": "1.0.0",
+      "description": "Adapt team-visible representation to the Team Profile without changing verified facts.",
+      "implements": {
+        "capability": "collaboration.surface.adapt",
+        "contract_version": 1
+      },
+      "requires": [
+        {
+          "capability": "collaboration.profile",
+          "contract_version": 1,
+          "required": true
+        }
+      ],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 600,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "low",
+        "wall_time": "low",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "host-native",
+        "entrypoint": "Team Profile guided surface formatting"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "runtime.team-surface-guard",
+      "version": "1.0.0",
+      "description": "Block Harness leakage and explicit team-rule violations before publication.",
+      "implements": {
+        "capability": "collaboration.surface.guard",
+        "contract_version": 1
+      },
+      "requires": [
+        {
+          "capability": "collaboration.profile",
+          "contract_version": 1,
+          "required": true
+        }
+      ],
+      "conflicts": [],
+      "permissions": {
+        "filesystem": "read",
+        "shell": false,
+        "network": false,
+        "credentials": false,
+        "git_push": false,
+        "deployment": false,
+        "external_side_effects": false
+      },
+      "host": {
+        "supported_hosts": [
+          "generic",
+          "codex",
+          "claude-code",
+          "cursor",
+          "deepseek-harness"
+        ]
+      },
+      "context": {
+        "discovery": "metadata",
+        "instructions": "on-demand",
+        "raw_outputs": "artifact-only",
+        "parent_output": "structured",
+        "parent_budget_tokens": 0,
+        "provenance": [
+          "POLICY",
+          "AUTHORITATIVE_PROJECT",
+          "DERIVED"
+        ]
+      },
+      "failure": {
+        "mode": "block",
+        "silent_downgrade_allowed": false
+      },
+      "lifecycle": {
+        "state": "stateless",
+        "teardown_required": false
+      },
+      "cost": {
+        "context": "low",
+        "model_calls": "none",
+        "wall_time": "low",
+        "human_attention": "none"
+      },
+      "evidence": {
+        "produces": "routing",
+        "decisive": false
+      },
+      "implementation": {
+        "kind": "script",
+        "entrypoint": "scripts/ai/team-compat.py --repo <repo> guard"
+      }
     }
   ]
 }
