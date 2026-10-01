@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/team-profile.schema.json",
+  "title": "AI Dev Harness V4.1 Team Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "repository",
+    "mode",
+    "observation",
+    "explicit_sources",
+    "rules",
+    "unknowns",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "mode": {
+      "const": "sidecar"
+    },
+    "repository": {
+      "type": "object"
+    },
+    "observation": {
+      "type": "object"
+    },
+    "explicit_sources": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "surface",
+          "key",
+          "strength",
+          "confidence",
+          "evidence_count",
+          "sources"
+        ],
+        "properties": {
+          "surface": {
+            "enum": [
+              "branch",
+              "commit",
+              "pull_request",
+              "comment",
+              "external"
+            ]
+          },
+          "key": {
+            "type": "string"
+          },
+          "value": {},
+          "strength": {
+            "enum": [
+              "enforced",
+              "explicit",
+              "strong-inferred",
+              "tentative"
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object"
+    }
+  }
+}
