@@ -66,9 +66,9 @@ required=(
   "ai/schemas/run-event.schema.json"
   "ai/schemas/provider-registry.schema.json"
   "ai/schemas/project-dashboard.schema.json"
-  "ai/schemas/dashboard-read-model.schema.json"
+  "ai/schemas/dashboard-read-model.schema.json"\n  "ai/schemas/team-profile.schema.json"
   "ai/templates/v4-dashboard.json"
-  "scripts/ai/v4.py"
+  "scripts/ai/v4.py"\n  "scripts/ai/team-compat.py"\n  "ai/v4/team-compatibility.md"
   "scripts/ai/lib/v4_core.py"
   "scripts/ai/lib/v4_dashboard.py"
   "scripts/ai/dashboard/index.html"
@@ -136,7 +136,7 @@ else
     scripts/ai/tests/test_review_records.py
     scripts/ai/tests/test_agent_trace.py
     scripts/ai/tests/test_project_index.py
-    scripts/ai/tests/test_v4_runtime.py
+    scripts/ai/tests/test_v4_runtime.py\n    scripts/ai/tests/test_team_compat.py
   )
   if ! python3 -m py_compile "${python_files[@]}"; then
     echo "FAIL Python syntax/compile check"
@@ -157,7 +157,7 @@ else
     ai/schemas/run-event.schema.json
     ai/schemas/provider-registry.schema.json
     ai/schemas/project-dashboard.schema.json
-    ai/schemas/dashboard-read-model.schema.json
+    ai/schemas/dashboard-read-model.schema.json\n    ai/schemas/team-profile.schema.json
     ai/v4/provider-registry.json
     ai/v4/self-description.json
     ai/templates/v4-dashboard.json
