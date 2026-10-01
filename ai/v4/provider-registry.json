@@ -1248,7 +1248,7 @@
       "requires": [],
       "conflicts": [],
       "permissions": {
-        "filesystem": "read",
+        "filesystem": "write-scoped",
         "shell": true,
         "network": false,
         "credentials": false,
@@ -1318,7 +1318,7 @@
       ],
       "conflicts": [],
       "permissions": {
-        "filesystem": "read",
+        "filesystem": "write-scoped",
         "shell": false,
         "network": false,
         "credentials": false,
