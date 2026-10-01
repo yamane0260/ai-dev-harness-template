@@ -1,4 +1,4 @@
-# AI Dev Harness V4
+# AI Dev Harness V4.1
 
 A portable, composition-oriented harness for AI-led software development.
 
@@ -123,3 +123,20 @@ Useful V3-era assets such as `scripts/ai/verify`, assurance validation, evidence
 They can be replaced incrementally behind capability contracts without changing the whole Harness at once.
 
 See `ai/v4/README.md` and `docs/decisions/2026-09-15-v4-composable-harness-architecture.md` for architecture details.
+
+
+## Existing team repository: Sidecar Mode
+
+V4.1 can observe and adapt to an existing team's collaboration conventions without adding Harness-only files to the target repository.
+
+```sh
+python3 scripts/ai/team-compat.py --repo /path/to/team-repo observe
+python3 scripts/ai/team-compat.py --repo /path/to/team-repo show
+python3 scripts/ai/team-compat.py --repo /path/to/team-repo guard --surface commit --file /tmp/commit-message.txt
+```
+
+State is external under `$HARNESS_STATE_HOME/repositories/<fingerprint>/` or `~/.local/state/ai-dev-harness/repositories/<fingerprint>/`.
+
+Team conventions may change representation but never weaken verification. Explicit AI-use disclosure, DCO/sign-off, authorship, or other team requirements are preserved.
+
+See `ai/v4/team-compatibility.md`.
