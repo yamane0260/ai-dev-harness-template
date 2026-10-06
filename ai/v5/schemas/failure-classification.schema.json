@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/v5/failure-classification.schema.json",
+  "title": "V5 Failure Classification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "taskId",
+    "class",
+    "reason",
+    "sameFailureCount",
+    "designChangeCount",
+    "regression"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "class": {
+      "enum": [
+        "implementation",
+        "design",
+        "requirement",
+        "oracle",
+        "environment",
+        "unknown"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sameFailureCount": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "designChangeCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "regression": {
+      "type": "boolean"
+    }
+  }
+}
