@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "taskId": "example-session-timeout",
+  "status": "implemented",
+  "changedPaths": ["src/auth/session.py"],
+  "decisions": ["Reused existing unauthorized response path."],
+  "residualRisks": [],
+  "assumptions": [],
+  "escalation": null
+}
