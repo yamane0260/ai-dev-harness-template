@@ -4,18 +4,112 @@
   "title": "V5 Task Envelope",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "id", "goal", "acceptance"],
+  "required": [
+    "version",
+    "id",
+    "goal",
+    "acceptance"
+  ],
   "properties": {
-    "version": {"const": 1},
-    "id": {"type": "string", "minLength": 1},
-    "goal": {"type": "string", "minLength": 1},
-    "acceptance": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "constraints": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
-    "scope": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
-    "mustNot": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
-    "riskHints": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
-    "domainHints": {"type": "array", "items": {"enum": ["security", "ux", "data", "reliability", "architecture"]}, "default": []},
-    "verification": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
-    "metadata": {"type": "object", "default": {}}
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "acceptance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "baseline": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "mustNot": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "riskHints": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "domainHints": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "security",
+          "ux",
+          "data",
+          "reliability",
+          "architecture"
+        ]
+      },
+      "default": []
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "evidenceKinds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]*$"
+      },
+      "default": []
+    },
+    "metadata": {
+      "type": "object",
+      "default": {}
+    }
   }
 }
