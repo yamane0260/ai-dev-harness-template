@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/v5/result-envelope.schema.json",
+  "title": "V5 Result Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "taskId", "status", "changedPaths", "decisions", "residualRisks", "assumptions", "escalation"],
+  "properties": {
+    "version": {"const": 1},
+    "taskId": {"type": "string", "minLength": 1},
+    "status": {"enum": ["implemented", "blocked", "needs_supervisor"]},
+    "changedPaths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "decisions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "residualRisks": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "escalation": {"type": ["object", "null"]}
+  }
+}
