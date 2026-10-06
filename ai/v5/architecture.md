@@ -1,96 +1,68 @@
-# V5 Architecture Design — Supervisor/Worker Split
+# V5 Architecture Design — Evidence-Driven Supervisor/Worker Split
 
-## 1. Problem statement
+## Objective
 
-V4.1 was designed around a human directly operating an implementation AI. That justified Dashboard views, human-legibility records, approval packets, long-lived project explanation, provider composition, and team-visible surface adaptation inside the harness.
+V5 optimizes the correction loop, not a single implementation attempt:
 
-V5 assumes a different environment: a supervisor AI coordinates one or more implementation workers. Repeating supervisor responsibilities inside every worker wastes context and model budget and can reduce implementation quality by crowding out task-relevant reasoning.
+```text
+design -> implement -> observe reality -> classify mismatch -> return to the correct layer
+```
 
-## 2. Responsibility boundary
+## Roles
 
-### Supervisor AI owns
+### Supervisor
+- clarifies requirements and creates/revises Acceptance Contracts;
+- decomposes work and allocates workers/verifiers;
+- owns private hold-out cases when useful;
+- classifies acceptance failures and chooses integration/release actions.
 
-- dialogue with humans;
-- requirement clarification and decomposition;
-- cross-task planning and dependency management;
-- allocation of work to workers;
-- team convention discovery and collaboration-surface wording;
-- project-wide memory/indexing;
-- human-facing status, dashboard, and explanations;
-- approval preparation and final release/integration decisions;
-- reconciliation of conflicting worker results.
+### Worker
+- runs deterministic risk/context preflight;
+- implements the bounded task;
+- produces evidence through configured adapters;
+- returns a compact handoff without claiming independent acceptance.
 
-### V5 Worker owns
+### Fresh Verifier
+- evaluates acceptance without worker narrative;
+- checks invariants and Brownfield baseline compatibility;
+- uses direct observations and optional hold-out cases;
+- returns pass/fail/unknown evidence without editing implementation.
 
-- validating the Task Envelope;
-- deterministic minimum risk detection;
-- loading only task-relevant context;
-- examining correctness, boundaries, failure modes, work fit, and simplicity;
-- implementing the bounded task;
-- running configured deterministic verification;
-- returning compact decisions, assumptions, residual risks, and escalation state.
+## Evidence model
 
-## 3. Stateless-by-default runtime
+Configured gates carry an evidence `kind` such as `test`, `static`, `api`, `browser`, `database`, `runtime`, `external`, or `human`. The task may require evidence kinds. A passing command is insufficient when the required kind is absent.
 
-V5 does not maintain a long-lived run ledger by default. The repository, CI, supervisor state, and Result Envelope are the durable sources. Verification output is a bounded artifact containing hashes and pass/fail state, not raw logs.
+## Contract drift protection
 
-This reduces duplicated state and prevents worker history from becoming another context source that must be continuously loaded.
+Preflight and verification carry a contract hash. If acceptance criteria, invariants, baseline, constraints, or evidence requirements change, old evidence is invalid.
 
-## 4. Safety model
+## Brownfield strategy
 
-Safety is split into two layers:
+Critical current behavior is recorded as `baseline`. V5 does not require full legacy understanding before change; it requires important legacy behavior not to change invisibly.
 
-1. **Deterministic floor** — path/hint based risk escalation, required gate routing, schema validation, exact-repository evidence freshness, and completion guard.
-2. **Reasoning layer** — the five-lens Perspective Scan and conditional domain capsules.
+## Risk-based independence
 
-A worker may always escalate above the floor. It cannot downgrade it.
+- GREEN: fresh verifier optional.
+- YELLOW: fresh verifier required.
+- RED: fresh verifier required; hold-out acceptance evidence is required when practical, otherwise an explicit not-applicable justification is required.
 
-## 5. Context budget model
+## Failure classes
 
-V5 treats context as a budgeted runtime resource.
+- `implementation`: design is sound, implementation is wrong.
+- `design`: architecture or behavior design must change.
+- `requirement`: intended behavior is ambiguous or contradictory.
+- `oracle`: verification expectation is wrong or insufficient.
+- `environment`: execution environment caused the failure.
+- `unknown`: evidence is insufficient.
 
-Default target:
+## Loop Guard
 
-- always-loaded `AGENTS.md`: approximately 1k tokens or less;
-- Task Envelope: approximately 800 tokens or less;
-- preflight result: a few hundred tokens;
-- each triggered domain capsule: approximately 300-600 tokens;
-- raw logs and broad repository exploration stay outside normal parent context.
+- first low-risk implementation failure may retry once;
+- repeated identical implementation failure forces fresh diagnosis;
+- RED implementation failure forces fresh diagnosis;
+- regression returns to baseline comparison before further change;
+- two design changes without convergence force supervisor review.
 
-The runtime returns file references, not copied bodies. The implementation agent reads only those references that are actually needed.
+## Completion states
 
-## 6. Perspective Scan
-
-The scan is intentionally smaller than the V4 Quality Envelope. It uses five stable questions that catch the majority of "it works, but it is not good professional work" failures:
-
-- Correctness
-- Boundary
-- Failure
-- Work fit
-- Simplicity
-
-A finding may trigger one of five optional capsules: security, UX, data, reliability, architecture.
-
-## 7. Completion semantics
-
-V5 never calculates universal or release readiness. Its strongest positive state is `implemented`:
-
-> The assigned worker task is implemented and all gates required by the current Worker Core preflight passed on the current repository state, with no unresolved worker escalation.
-
-Integration, acceptance, rollout, human judgment, and release remain outside this claim.
-
-## 8. Non-goals
-
-V5 deliberately does not provide:
-
-- Dashboard UI;
-- provider marketplace/composition engine;
-- human approval packet generation;
-- human-legibility documentation generation;
-- long-running orchestration or worker delegation;
-- team culture inference;
-- PR/commit wording adaptation;
-- project-wide knowledge index;
-- release readiness calculation.
-
-Those can exist in a supervisor layer without consuming Worker context.
+`HANDOFF_READY` means worker evidence is current for the exact contract. `ACCEPTANCE_READY` means independent acceptance proved the bounded contract, invariants, and baseline. Neither means release-ready.
