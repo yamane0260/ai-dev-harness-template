@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "id": "example-session-timeout",
+  "goal": "Make session expiration return a consistent API error without changing the public success response.",
+  "acceptance": [
+    "Expired sessions return the existing unauthorized error shape.",
+    "Valid sessions keep current behavior.",
+    "Relevant automated tests pass."
+  ],
+  "constraints": [
+    "Reuse existing authentication middleware."
+  ],
+  "scope": [
+    "src/auth"
+  ],
+  "mustNot": [
+    "Do not change the public success payload."
+  ],
+  "riskHints": [
+    "auth"
+  ],
+  "domainHints": [],
+  "verification": [],
+  "metadata": {}
+}
