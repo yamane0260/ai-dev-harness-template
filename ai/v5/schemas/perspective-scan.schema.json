@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/v5/perspective-scan.schema.json",
+  "title": "V5 Perspective Scan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "lenses", "escalations", "blockingUnknowns"],
+  "properties": {
+    "version": {"const": 1},
+    "lenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["correctness", "boundary", "failure", "work_fit", "simplicity"],
+      "properties": {
+        "correctness": {"$ref": "#/$defs/lens"},
+        "boundary": {"$ref": "#/$defs/lens"},
+        "failure": {"$ref": "#/$defs/lens"},
+        "work_fit": {"$ref": "#/$defs/lens"},
+        "simplicity": {"$ref": "#/$defs/lens"}
+      }
+    },
+    "escalations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domain", "reason"],
+        "properties": {
+          "domain": {"enum": ["security", "ux", "data", "reliability", "architecture"]},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "blockingUnknowns": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "lens": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "note"],
+      "properties": {
+        "status": {"enum": ["clear", "finding", "unknown"]},
+        "note": {"type": "string"}
+      }
+    }
+  }
+}
