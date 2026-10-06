@@ -4,32 +4,96 @@
   "title": "V5 Verification Evidence",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "repository", "checks", "passed"],
+  "required": [
+    "version",
+    "contractHash",
+    "repository",
+    "checks",
+    "passed"
+  ],
   "properties": {
-    "version": {"const": 1},
+    "version": {
+      "const": 1
+    },
+    "contractHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "repository": {
       "type": "object",
-      "required": ["head", "dirty", "workingTreeHash"],
+      "required": [
+        "head",
+        "dirty",
+        "workingTreeHash"
+      ],
       "properties": {
-        "head": {"type": ["string", "null"]},
-        "dirty": {"type": ["boolean", "null"]},
-        "workingTreeHash": {"type": ["string", "null"]}
+        "head": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dirty": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "workingTreeHash": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
       }
     },
     "checks": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "status", "exitCode", "outputHash"],
+        "required": [
+          "name",
+          "kind",
+          "status",
+          "exitCode",
+          "outputHash"
+        ],
         "properties": {
-          "name": {"type": "string"},
-          "status": {"enum": ["passed", "failed", "unconfigured"]},
-          "exitCode": {"type": ["integer", "null"]},
-          "outputHash": {"type": ["string", "null"]},
-          "failureTail": {"type": "string"}
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "unconfigured"
+            ]
+          },
+          "exitCode": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "outputHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failureTail": {
+            "type": "string"
+          }
         }
       }
     },
-    "passed": {"type": "boolean"}
+    "passed": {
+      "type": "boolean"
+    }
   }
 }
