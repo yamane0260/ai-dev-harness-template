@@ -2,9 +2,9 @@ name: v5-worker-core
 
 on:
   push:
-    branches: [v5-worker-core]
+    branches: [main, v5-worker-core, v5-evidence-loop]
   pull_request:
-    branches: [v5-worker-core]
+    branches: [main, v5-worker-core, v5-evidence-loop]
 
 permissions:
   contents: read
