@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/v5/task-envelope.schema.json",
+  "title": "V5 Task Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "id", "goal", "acceptance"],
+  "properties": {
+    "version": {"const": 1},
+    "id": {"type": "string", "minLength": 1},
+    "goal": {"type": "string", "minLength": 1},
+    "acceptance": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "constraints": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+    "scope": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+    "mustNot": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+    "riskHints": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+    "domainHints": {"type": "array", "items": {"enum": ["security", "ux", "data", "reliability", "architecture"]}, "default": []},
+    "verification": {"type": "array", "items": {"type": "string", "minLength": 1}, "default": []},
+    "metadata": {"type": "object", "default": {}}
+  }
+}
