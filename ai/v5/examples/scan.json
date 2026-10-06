@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "lenses": {
+    "correctness": {"status": "clear", "note": "Acceptance criteria are explicit and testable."},
+    "boundary": {"status": "clear", "note": "Authentication boundary is known; security capsule is required by preflight."},
+    "failure": {"status": "clear", "note": "Expired and valid session paths are both covered."},
+    "work_fit": {"status": "clear", "note": "The existing error contract is preserved for clients and operators."},
+    "simplicity": {"status": "clear", "note": "The change can reuse the existing middleware rather than adding a new abstraction."}
+  },
+  "escalations": [],
+  "blockingUnknowns": []
+}
