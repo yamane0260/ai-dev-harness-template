@@ -1,102 +1,42 @@
-# AI Development Harness V4
+# AI Development Harness V5 — Worker Core
 
-Optimize for correctness, context efficiency, inspectable composition, durable human understanding, and explicit responsibility transfer.
+V5 is a lightweight harness for implementation agents supervised by another AI.
+The supervisor owns human communication, planning across workers, integration, approval, release decisions, and long-term project explanation.
+The worker owns only its assigned implementation scope and evidence-backed handoff.
 
-V4 is the authoritative runtime model. Existing V3 verification, assurance, review, and knowledge assets remain available as V4 providers where they preserve useful behavior.
+## Worker flow
 
-## Start here
+1. Receive a bounded Task Envelope.
+2. Run `python3 scripts/ai/v5.py preflight --task <task.json>`.
+3. Load only the returned `contextRefs` plus code needed for the task.
+4. Complete the five-lens Perspective Scan before or during implementation.
+5. Implement the smallest coherent change that satisfies acceptance criteria and constraints.
+6. Run `python3 scripts/ai/v5.py verify --task <task.json> --scan <scan.json>`.
+7. Return a Result Envelope and pass `guard-result` before reporting `implemented`.
 
-- New/adopted repository: use `bootstrap-project`.
-- Product change: use `develop-feature`.
-- Human project view: run `python3 scripts/ai/v4.py dashboard`.
-- V4 contracts and architecture: `ai/v4/`.
-- Human repository map: `PROJECT_MAP.md`.
-- Deterministic verification: `scripts/ai/verify`.
-- Assurance state: `assurance/`.
+## Kernel invariants
 
-## V4 composition rule
+- Never claim `implemented` without current-repository verification for every required gate.
+- Never weaken tests, requirements, gates, or safety constraints merely to obtain a passing result.
+- Never invent APIs, requirements, commands, observations, or historical rationale.
+- Deterministic risk floors may be raised but never lowered by the worker.
+- A technically working solution is insufficient if it creates a material operational, maintenance, UX, data, security, or reliability problem.
+- Unresolved uncertainty is returned to the supervisor; do not silently guess through consequential ambiguity.
 
-For non-trivial work, compile a V4 execution plan before implementation.
+## Perspective Scan
 
-```sh
-python3 scripts/ai/v4.py plan --task implement
-```
+Always examine exactly these lenses:
 
-Add only the material routing inputs that actually apply, for example:
+- `correctness`
+- `boundary`
+- `failure`
+- `work_fit`
+- `simplicity`
 
-```sh
-python3 scripts/ai/v4.py plan \
-  --task implement \
-  --quality security \
-  --knowledge-impact MATERIAL
-```
+Only load a domain capsule when preflight or the scan triggers it. Do not load all V5 documents by default.
 
-The execution plan selects semantic capabilities first and concrete providers second.
-Load provider instructions only after selection.
-Do not mechanically run every available Skill.
+## Meaning of completion
 
-## Independent inputs
-
-Keep these inputs separate.
-
-- **Risk**: GREEN / YELLOW / RED. Deterministic minimum safety and evidence floor.
-- **Quality Impact**: only domains materially affected by the task.
-- **Knowledge Impact**: NONE / LOW / MATERIAL / CRITICAL.
-- **Profile**: optimization preferences such as rapid, balanced, understanding, or high-assurance.
-- **Human Understanding Requirement**: what the responsible maintainer must be able to understand.
-
-A profile may optimize speed, autonomy, explanation depth, or context use.
-It may not weaken a required risk, security, Claim, Evidence, Human Check, or release constraint.
-
-## Context rules
-
-- Prefer one task per fresh top-level session.
-- Use the execution plan and `ai/context-map.md` to load only relevant sources.
-- Keep broad exploration isolated when possible and return bounded structured results.
-- Keep raw logs, transcripts, screenshots, large tool output, and private reasoning outside parent context.
-- Load full provider instructions only for selected providers.
-- Preserve non-reconstructable decisions, invariants, and failure/recovery knowledge in durable project records.
-
-## Hard rules
-
-- Never report successful completion without current-revision support.
-- Never silently omit or downgrade a required capability after provider failure.
-- Keep `AI_REVIEWED` distinct from `MACHINE_VERIFIED`.
-- A pending or failed MUST Human Check blocks readiness when that check is required.
-- Never weaken tests, requirements, or gates merely to obtain green status.
-- Never invent commands, dependencies, APIs, observations, requirements, or historical rationale.
-- Treat traces as action/audit evidence, not proof of product correctness.
-- Do not persist raw prompts, raw completions, secrets, credentials, or private reasoning in the V4 run ledger.
-- Human approval is reserved for decisions that technical verification cannot determine.
-
-## Runtime records
-
-V4 separates:
-
-- execution plan and provider selection;
-- append-only run events;
-- deterministic evidence;
-- structured reviews;
-- Human Checks;
-- durable project knowledge;
-- Dashboard read models.
-
-Dashboard data must be derived from structured runtime records.
-Dashboard rendering must not require an LLM.
-
-## Commands
-
-```sh
-python3 scripts/ai/v4.py init
-python3 scripts/ai/v4.py plan --task implement
-python3 scripts/ai/v4.py state --write
-python3 scripts/ai/v4.py dashboard
-
-./scripts/ai/self-test
-./scripts/ai/classify-risk
-./scripts/ai/verify --risk green
-./scripts/ai/validate-assurance --manifest assurance/current/<change>/manifest.json
-```
-
-Apply `ai/policies/mutual-verification.md` when humans and agents disagree materially.
-Resolve disagreements through requirements, implementation, tests, or observations rather than defaulting to documentation repair.
+`implemented` means the worker completed the assigned change and its required local verification.
+It does **not** mean release-ready, approved, production-safe in every dimension, or accepted by a human.
+Those judgments belong to the supervisor/integration layer.
