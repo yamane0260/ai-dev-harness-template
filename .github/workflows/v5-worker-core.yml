@@ -1,0 +1,29 @@
+name: v5-worker-core
+
+on:
+  push:
+    branches: [v5-worker-core]
+  pull_request:
+    branches: [v5-worker-core]
+
+permissions:
+  contents: read
+
+jobs:
+  worker-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: V5 runtime tests
+        run: python3 -m unittest discover -s scripts/ai/tests -p 'test_v5_runtime.py'
+
+      - name: Validate example task
+        run: python3 scripts/ai/v5.py validate-task --task ai/v5/examples/task.json
+
+      - name: Run example preflight
+        run: python3 scripts/ai/v5.py preflight --task ai/v5/examples/task.json
+
+      - name: Validate example perspective scan
+        run: python3 scripts/ai/v5.py validate-scan --scan ai/v5/examples/scan.json
