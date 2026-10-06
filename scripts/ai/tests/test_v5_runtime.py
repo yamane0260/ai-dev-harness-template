@@ -10,12 +10,17 @@ HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 
 from lib.v5_core import (
+    build_verifier_packet,
+    contract_fingerprint,
     detect_domains,
+    guard_acceptance,
     guard_result,
+    next_action,
     preflight,
     repository_fingerprint,
     risk_floor,
     run_verification,
+    validate_acceptance_verdict,
     validate_scan,
     validate_task,
 )
@@ -27,12 +32,15 @@ def task(**overrides):
         "id": "t1",
         "goal": "Change behavior safely",
         "acceptance": ["Expected behavior is observable"],
+        "invariants": ["Existing success behavior remains unchanged"],
+        "baseline": [],
         "constraints": [],
         "scope": ["src/service.py"],
         "mustNot": [],
         "riskHints": [],
         "domainHints": [],
         "verification": [],
+        "evidenceKinds": ["test"],
         "metadata": {},
     }
     value.update(overrides)
@@ -42,7 +50,7 @@ def task(**overrides):
 def config(command="true"):
     return {
         "version": 1,
-        "gates": {"basic": {"command": command, "timeoutSeconds": 5}},
+        "gates": {"basic": {"command": command, "kind": "test", "timeoutSeconds": 5}},
         "riskGates": {"GREEN": ["basic"], "YELLOW": ["basic"], "RED": ["basic"]},
         "domainGates": {domain: [] for domain in ("security", "ux", "data", "reliability", "architecture")},
     }
@@ -60,6 +68,19 @@ def scan():
     }
 
 
+def result():
+    return {
+        "version": 1,
+        "taskId": "t1",
+        "status": "implemented",
+        "changedPaths": [],
+        "decisions": [],
+        "residualRisks": [],
+        "assumptions": [],
+        "escalation": None,
+    }
+
+
 class V5RuntimeTests(unittest.TestCase):
     def init_repo(self, root):
         subprocess.run(["git", "init", "-q"], cwd=root, check=True)
@@ -69,9 +90,39 @@ class V5RuntimeTests(unittest.TestCase):
         subprocess.run(["git", "add", "a.txt"], cwd=root, check=True)
         subprocess.run(["git", "commit", "-qm", "init"], cwd=root, check=True)
 
+    def verdict(self, value, root, independent=False, holdout_status="not_used", holdout_reason=""):
+        contract_hash = contract_fingerprint(value)
+        return {
+            "version": 1,
+            "taskId": value["id"],
+            "contractHash": contract_hash,
+            "repository": repository_fingerprint(root),
+            "independentContext": independent,
+            "holdout": {"status": holdout_status, "reason": holdout_reason},
+            "acceptance": [
+                {"text": x, "status": "pass", "evidence": ["direct-observation:acceptance"]}
+                for x in validate_task(value)["acceptance"]
+            ],
+            "invariants": [
+                {"text": x, "status": "pass", "evidence": ["direct-observation:invariant"]}
+                for x in validate_task(value)["invariants"]
+            ],
+            "baseline": [
+                {"text": x, "status": "pass", "evidence": ["snapshot:before-after"]}
+                for x in validate_task(value)["baseline"]
+            ],
+            "unresolved": [],
+        }
+
     def test_task_requires_acceptance(self):
         with self.assertRaises(ValueError):
             validate_task(task(acceptance=[]))
+
+    def test_contract_hash_changes_with_invariant(self):
+        self.assertNotEqual(
+            contract_fingerprint(task()),
+            contract_fingerprint(task(invariants=["Different invariant"])),
+        )
 
     def test_scan_requires_all_lenses(self):
         value = scan()
@@ -101,21 +152,22 @@ class V5RuntimeTests(unittest.TestCase):
             self.init_repo(root)
             value = task()
             pf = preflight(value, value["scope"], config(), root)
-            evidence = run_verification(pf["requiredGates"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
             self.assertTrue(evidence["passed"])
             self.assertEqual(repository_fingerprint(root), evidence["repository"])
-            result = {
-                "version": 1,
-                "taskId": "t1",
-                "status": "implemented",
-                "changedPaths": [],
-                "decisions": [],
-                "residualRisks": [],
-                "assumptions": [],
-                "escalation": None,
-            }
-            verdict = guard_result(value, pf, scan(), evidence, result, root)
+            verdict = guard_result(value, pf, scan(), evidence, result(), root)
             self.assertTrue(verdict["ok"])
+
+    def test_missing_required_evidence_kind_blocks(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            value = task(evidenceKinds=["browser"])
+            pf = preflight(value, value["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
+            verdict = guard_result(value, pf, scan(), evidence, result(), root)
+            self.assertFalse(verdict["ok"])
+            self.assertTrue(any("browser" in reason for reason in verdict["reasons"]))
 
     def test_stale_evidence_blocks(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -123,21 +175,117 @@ class V5RuntimeTests(unittest.TestCase):
             self.init_repo(root)
             value = task()
             pf = preflight(value, value["scope"], config(), root)
-            evidence = run_verification(pf["requiredGates"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
             (root / "a.txt").write_text("changed\n", encoding="utf-8")
-            result = {
-                "version": 1,
-                "taskId": "t1",
-                "status": "implemented",
-                "changedPaths": ["a.txt"],
-                "decisions": [],
-                "residualRisks": [],
-                "assumptions": [],
-                "escalation": None,
-            }
-            verdict = guard_result(value, pf, scan(), evidence, result, root)
+            verdict = guard_result(value, pf, scan(), evidence, result(), root)
             self.assertFalse(verdict["ok"])
             self.assertTrue(any("stale" in reason for reason in verdict["reasons"]))
+
+    def test_changed_contract_blocks_old_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            original = task()
+            pf = preflight(original, original["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(original))
+            changed = task(acceptance=["A new acceptance condition"])
+            verdict = guard_result(changed, pf, scan(), evidence, result(), root)
+            self.assertFalse(verdict["ok"])
+            self.assertTrue(any("different acceptance contract" in reason for reason in verdict["reasons"]))
+
+    def test_verifier_packet_excludes_worker_narrative(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            value = task()
+            pf = preflight(value, value["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
+            packet = build_verifier_packet(value, pf, evidence, root)
+            self.assertNotIn("decisions", packet)
+            self.assertNotIn("assumptions", packet)
+            self.assertIn("independenceRule", packet)
+
+    def test_yellow_requires_fresh_verifier(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            value = task(riskHints=["api"])
+            pf = preflight(value, value["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
+            packet = build_verifier_packet(value, pf, evidence, root)
+            acceptance = self.verdict(value, root, independent=False)
+            verdict = guard_acceptance(value, pf, packet, acceptance, root)
+            self.assertFalse(verdict["ok"])
+            self.assertTrue(any("fresh independent" in reason for reason in verdict["reasons"]))
+
+    def test_red_requires_holdout_or_justification(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            value = task(riskHints=["auth"])
+            pf = preflight(value, value["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
+            packet = build_verifier_packet(value, pf, evidence, root)
+            acceptance = self.verdict(value, root, independent=True)
+            verdict = guard_acceptance(value, pf, packet, acceptance, root)
+            self.assertFalse(verdict["ok"])
+            acceptance = self.verdict(value, root, independent=True, holdout_status="not_applicable", holdout_reason="No executable holdout exists; direct security review used.")
+            verdict = guard_acceptance(value, pf, packet, acceptance, root)
+            self.assertTrue(verdict["ok"])
+
+    def test_baseline_requires_explicit_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_repo(root)
+            value = task(baseline=["Legacy API response stays byte-compatible"])
+            pf = preflight(value, value["scope"], config(), root)
+            evidence = run_verification(pf["requiredGates"], config(), root, contract_fingerprint(value))
+            packet = build_verifier_packet(value, pf, evidence, root)
+            acceptance = self.verdict(value, root)
+            acceptance["baseline"] = []
+            verdict = guard_acceptance(value, pf, packet, acceptance, root)
+            self.assertFalse(verdict["ok"])
+            self.assertTrue(any("baseline missing" in reason for reason in verdict["reasons"]))
+
+    def test_verdict_rejects_pass_without_evidence(self):
+        value = {
+            "version": 1,
+            "taskId": "t1",
+            "contractHash": "x",
+            "repository": {},
+            "independentContext": True,
+            "holdout": {"status": "used", "reason": ""},
+            "acceptance": [{"text": "x", "status": "pass", "evidence": []}],
+            "invariants": [],
+            "baseline": [],
+            "unresolved": [],
+        }
+        with self.assertRaises(ValueError):
+            validate_acceptance_verdict(value)
+
+    def test_loop_guard_stops_repeated_implementation_retry(self):
+        classification = {
+            "version": 1,
+            "taskId": "t1",
+            "class": "implementation",
+            "reason": "same assertion still fails",
+            "sameFailureCount": 2,
+            "designChangeCount": 0,
+            "regression": False,
+        }
+        self.assertEqual("fresh_diagnosis", next_action(classification)["action"])
+
+    def test_oracle_failure_repairs_verification_not_code(self):
+        classification = {
+            "version": 1,
+            "taskId": "t1",
+            "class": "oracle",
+            "reason": "acceptance test asserts the wrong legacy response",
+            "sameFailureCount": 1,
+            "designChangeCount": 0,
+            "regression": False,
+        }
+        self.assertEqual("repair_verification", next_action(classification)["action"])
 
 
 if __name__ == "__main__":
