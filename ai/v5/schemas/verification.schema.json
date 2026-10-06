@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ai-dev-harness/v5/verification.schema.json",
+  "title": "V5 Verification Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "repository", "checks", "passed"],
+  "properties": {
+    "version": {"const": 1},
+    "repository": {
+      "type": "object",
+      "required": ["head", "dirty", "workingTreeHash"],
+      "properties": {
+        "head": {"type": ["string", "null"]},
+        "dirty": {"type": ["boolean", "null"]},
+        "workingTreeHash": {"type": ["string", "null"]}
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status", "exitCode", "outputHash"],
+        "properties": {
+          "name": {"type": "string"},
+          "status": {"enum": ["passed", "failed", "unconfigured"]},
+          "exitCode": {"type": ["integer", "null"]},
+          "outputHash": {"type": ["string", "null"]},
+          "failureTail": {"type": "string"}
+        }
+      }
+    },
+    "passed": {"type": "boolean"}
+  }
+}
