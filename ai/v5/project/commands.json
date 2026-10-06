@@ -3,17 +3,28 @@
   "gates": {
     "diff-check": {
       "command": "git diff --check",
+      "kind": "static",
       "timeoutSeconds": 60
     },
     "v5-self-test": {
       "command": "python3 -m unittest discover -s scripts/ai/tests -p 'test_v5_runtime.py'",
+      "kind": "test",
       "timeoutSeconds": 120
     }
   },
   "riskGates": {
-    "GREEN": ["diff-check", "v5-self-test"],
-    "YELLOW": ["diff-check", "v5-self-test"],
-    "RED": ["diff-check", "v5-self-test"]
+    "GREEN": [
+      "diff-check",
+      "v5-self-test"
+    ],
+    "YELLOW": [
+      "diff-check",
+      "v5-self-test"
+    ],
+    "RED": [
+      "diff-check",
+      "v5-self-test"
+    ]
   },
   "domainGates": {
     "security": [],
